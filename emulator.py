@@ -2,11 +2,13 @@
 import numpy as np
 import emcee
 import scipy.interpolate as interp
-from scipy.spatial import KDTree as KDTree
+from scipy.spatial import cKDTree as KDTree
 import scipy.optimize as opt
 import math
 
 import sys
+
+import matplotlib.pyplot as plt
 
 
 def test_good(x):
@@ -80,20 +82,14 @@ class regressor(object):
         num_train = xdata.shape[0]-num_cv
 
         #Pre-process data
-        mean_vals = np.array([np.mean(col) for col in xdata.T])
-        rms_vals = np.array([np.sqrt(np.mean(col**2)) for col in xdata.T])
-        print "these are rms_vals", rms_vals
-        print "these are mean_vals", mean_vals
+        #mean_vals = np.array([np.mean(col) for col in xdata.T])
+        #rms_vals = np.array([np.sqrt(np.mean(col**2)) for col in xdata.T])
 
-        print "do data preprocessing by writing function"
-        sys.exit()
+        rand_subset=np.arange(xdata.shape[0])
+        np.random.shuffle(rand_subset)
 
-
-        test=np.arange(xdata.shape[0])
-        np.random.shuffle(test)
-
-        xdata=np.array([xdata[tester] for tester in test])
-        ydata=np.array([ydata[tester] for tester in test])
+        xdata=np.array([xdata[rand_index] for rand_index in rand_subset])
+        ydata=np.array([ydata[rand_index] for rand_index in rand_subset])
 
         x_cv = xdata[-num_cv:]
         y_cv = ydata[-num_cv:]
@@ -144,11 +140,17 @@ class regressor(object):
 
             #Cholesky decompose to make new basis
             L_mat = np.linalg.cholesky(cov)
-            self.L_mat = L_mat
+            self.L_mat = np.linalg.inv(L_mat)
 
             #Transform xdata into new basis
             self.xtrain = xdata
-            self.transf_x = np.array([np.dot(L_mat,x) for x in xdata])
+            self.transf_x = np.array([np.dot(self.L_mat,x) for x in xdata])
+
+            #DEBUG
+            #plt.plot(xdata[:,0],xdata[:,1],'.',color='r')
+            #plt.plot(self.transf_x[:,0],self.transf_x[:,1],'.')
+            #plt.show()
+            #sys.exit()
 
             #Store training
             self.ytrain = ydata
@@ -212,11 +214,12 @@ class regressor(object):
 
             dist_list = np.array(dist_list)
 
-            def error_model(dist, a, b, c, d):
-                return a*(dist/c) + b*(dist/c)**d
+            def error_model(dist, a, b, c):
+                return a*(dist) + b*(dist)**c
 
             bestfit, cov = opt.curve_fit(error_model,
-                    dist_list,np.abs(ytrain))
+                    dist_list,np.abs(ytrain),
+                    bounds=((0.0,0.0,0.0),(np.inf,np.inf,np.inf)))
 
             print "this is bestfit:", bestfit
 
@@ -227,19 +230,19 @@ class regressor(object):
                 #Mean distance to NN
                 dist = np.mean(dist)
 
-                dist = dist/bestfit[2]
+                #dist = dist/bestfit[2]
 
-                err_guess = bestfit[0]*dist + bestfit[1]*dist**bestfit[3]
+                err_guess = bestfit[0]*dist + bestfit[1]*dist**bestfit[2]
                 rand_sign = np.random.rand() - 0.5
                 #err_guess *= 1.0 if rand_sign>0.0 else -1.0
 
                 return err_guess
 
 
-            import matplotlib.pyplot as plt
-            plt.plot(dist_list, np.abs(ytrain),'bo')
-            plt.plot(dist_list, map(new_error_model,xtrain),'ro')
-            plt.show()
+            #DEBUG
+            #plt.plot(dist_list, np.abs(ytrain),'bo')
+            #plt.plot(dist_list, map(new_error_model,xtrain),'ro')
+            #plt.show()
 
 
             return new_error_model
@@ -384,18 +387,22 @@ def main():
 
         def get_x():
             return np.array([np.random.normal(0.0,1.0),
-                np.random.normal(0.0,0.1),
-                np.random.normal(1.0,0.1),
-                np.random.normal(0.0,0.1),
-                np.random.normal(0.0,60.1),
-                np.random.normal(1.0,2.1)])
+                np.random.normal(5.0,0.1)])
+                #np.random.normal(1.0,0.1),
+                #np.random.normal(0.0,0.1),
+                #np.random.normal(0.0,60.1),
+                #np.random.normal(1.0,2.1)])
 
         Xtrain = np.array([get_x() for _ in xrange(10000)])
         xlist = np.array([get_x() for _ in xrange(10)])
 
+    else:
+        raise RuntimeError('This number of dimensions has'+
+                ' not been implemented for testing yet.')
+
     Ytrain = np.array([loglike(X) for X in Xtrain])
 
-    loglike.train(Xtrain,Ytrain,frac_err_local=0.05,abs_err_local=5e-1,output_err=True)
+    loglike.train(Xtrain,Ytrain,frac_err_local=0.05,abs_err_local=1e0,output_err=True)
 
     for x in xlist:
         print "x", x
