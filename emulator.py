@@ -221,7 +221,7 @@ class regressor(object):
                     #bounds=((0.0,0.0,0.0),(np.inf,np.inf,np.inf)))
                     bounds=((0.0,0.0,0.0),(1e1,1e1,1e1)))
 
-            print "this is bestfit:", bestfit
+            #print "this is bestfit:", bestfit
 
             def new_error_model(xval):
                 xval = np.dot(self.L_mat,xval)
@@ -265,11 +265,16 @@ class emulator(regressor):
         self.batchTrainY = []
 
         self.initTrainThresh = 1000
-        self.otherTrainThresh = 200
+        self.otherTrainThresh = 5000
+
+        #DEBUG
+        self.nexact = 0
+        self.nemul = 0
 
     def overrideDefaults(self, initTrainThresh, otherTrainThresh):
         """Override some of the defaults that are otherwise set
         in the constructor."""
+
         self.initTrainThresh = initTrainThresh
         self.otherTrainThresh = otherTrainThresh
 
@@ -288,7 +293,7 @@ class emulator(regressor):
         return myY
 
 
-    def train(self, xtrain, ytrain,frac_err_local=0.01,abs_err_local=0.1,output_err=False):
+    def train(self, xtrain, ytrain,frac_err_local=1.0,abs_err_local=0.05,output_err=False):
         """Train a ML algorithm to replace true_func: X --> Y.  Estimate error model via cross-validation.
 
         Parameters
@@ -313,6 +318,8 @@ class emulator(regressor):
             Set to False if you do not want the error to be an output of the emulated function.
             Set to True if you do.
         """
+
+        print "RETRAINING!------------------------"
 
         self.frac_err_local = frac_err_local
         self.abs_err_local = abs_err_local
@@ -402,12 +409,13 @@ class emulator(regressor):
         if not goodval or not gooderr:
             #if self.trained:
             #    print "Exact evaluation -----------",goodval,gooderr
+            self.nexact += 1
             val = self.eval_true_func(x)
             err = 0.0
         else:
-            pass
-            #if self.trained:
-            #    print "Emulated -------", val, err, self.true_func(x)
+            if self.trained:
+                self.nemul += 1
+                #print "Emulated -------", val, err#, self.true_func(x)
 
         if self.output_err:
             return float(val), float(err)
@@ -417,9 +425,52 @@ class emulator(regressor):
 
 def main():
 
+
+    ndim = 2
+
+    nwalkers = 20
+    niterations = 5000
+    nthreads = 1
+
+    #Make fake data
+
+    def get_x(ndim):
+
+        if ndim==1:
+
+            return np.random.randn(1000)
+
+        elif ndim==2:
+
+            return np.array([np.random.normal(0.0,1.0),
+                np.random.normal(0.0,0.1)])
+                #np.random.normal(1.0,0.1),
+                #np.random.normal(0.0,0.1),
+                #np.random.normal(0.0,60.1),
+                #np.random.normal(1.0,2.1)])
+
+    if ndim==1:
+        Xtrain = get_x(ndim)
+        xlist = np.linspace(-3.0,3.0,11)
+
+    elif ndim==2:
+
+        Xtrain = np.array([get_x(ndim) for _ in xrange(10000)])
+        xlist = np.array([get_x(ndim) for _ in xrange(10)])
+
+    else:
+        raise RuntimeError('This number of dimensions has'+
+                ' not been implemented for testing yet.')
+
+
+    #Ytrain = np.array([loglike(X) for X in Xtrain])
+    #loglike.train(Xtrain,Ytrain,frac_err_local=0.05,abs_err_local=1e0,output_err=True)
+
+    ######################
+    ######################
     import emcee
 
-    #Fake likelihood
+    #Toy likelihood
     @emulator
     def loglike(x):
         if x.ndim!=1:
@@ -429,39 +480,35 @@ def main():
             return np.array(loglist)
         else:
             return np.array(-np.dot(x,x))
-
-    ndim = 2
-
-    #Make fake data
-    if ndim==1:
-        Xtrain = np.random.randn(1000)
-        xlist = np.linspace(-3.0,3.0,11)
-
-    elif ndim==2:
-
-        def get_x():
-            return np.array([np.random.normal(0.0,1.0),
-                np.random.normal(5.0,0.1)])
-                #np.random.normal(1.0,0.1),
-                #np.random.normal(0.0,0.1),
-                #np.random.normal(0.0,60.1),
-                #np.random.normal(1.0,2.1)])
-
-        Xtrain = np.array([get_x() for _ in xrange(10000)])
-        xlist = np.array([get_x() for _ in xrange(10)])
-
-    else:
-        raise RuntimeError('This number of dimensions has'+
-                ' not been implemented for testing yet.')
+    ######################
+    ######################
 
 
-    Ytrain = np.array([loglike(X) for X in Xtrain])
+    p0 = np.array([get_x(ndim) for _ in xrange(nwalkers)])
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, loglike, threads=nthreads)
 
-    #loglike.train(Xtrain,Ytrain,frac_err_local=0.05,abs_err_local=1e0,output_err=True)
+
 
     for x in xlist:
         print "x", x
         print "val, err", loglike(x)
+
+    for result in sampler.sample(p0, iterations=niterations, storechain=False):
+        fname = open('test.txt', "a")
+
+        #result[0] = chain
+        #result[1] = like
+
+        for elmn in zip(result[1],result[0]):
+            fname.write("%s " % str(elmn[0]))
+            for k in list(elmn[1]):
+                fname.write("%s " % str(k))
+            fname.write("\n")
+
+    print "n exact evals:", loglike.nexact
+    print "n emul evals:", loglike.nemul
+
+    sys.exit()
 
 
 
