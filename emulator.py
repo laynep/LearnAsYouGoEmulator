@@ -1,6 +1,5 @@
 #!/bin/python
 import numpy as np
-import emcee
 import scipy.interpolate as interp
 from scipy.spatial import cKDTree as KDTree
 import scipy.optimize as opt
@@ -219,7 +218,8 @@ class regressor(object):
 
             bestfit, cov = opt.curve_fit(error_model,
                     dist_list,np.abs(ytrain),
-                    bounds=((0.0,0.0,0.0),(np.inf,np.inf,np.inf)))
+                    #bounds=((0.0,0.0,0.0),(np.inf,np.inf,np.inf)))
+                    bounds=((0.0,0.0,0.0),(1e1,1e1,1e1)))
 
             print "this is bestfit:", bestfit
 
@@ -261,8 +261,34 @@ class emulator(regressor):
 
         self.trained = False
 
+        self.batchTrainX = []
+        self.batchTrainY = []
 
-    def train(self, xtrain, ytrain,frac_err_local=0.01,abs_err_local=0.0,output_err=False):
+        self.initTrainThresh = 1000
+        self.otherTrainThresh = 200
+
+    def overrideDefaults(self, initTrainThresh, otherTrainThresh):
+        """Override some of the defaults that are otherwise set
+        in the constructor."""
+        self.initTrainThresh = initTrainThresh
+        self.otherTrainThresh = otherTrainThresh
+
+
+    def eval_true_func(self,x):
+        """Wrapper for real emulating function.  You want this so that
+        you can do some pre-processing, training, or saving each time
+        the emulator gets called."""
+
+        myY = self.true_func(x)
+
+        #Add x, val to a batch list that we will hold around
+        self.batchTrainX.append(x)
+        self.batchTrainY.append(myY)
+
+        return myY
+
+
+    def train(self, xtrain, ytrain,frac_err_local=0.01,abs_err_local=0.1,output_err=False):
         """Train a ML algorithm to replace true_func: X --> Y.  Estimate error model via cross-validation.
 
         Parameters
@@ -301,7 +327,8 @@ class emulator(regressor):
 
         #Separate into training and cross-validation sets with 50-50 split so that
         #the prediction and the error are estimated off the same amount of data
-        frac_cv = 0.15
+
+        frac_cv = 0.5
         xtrain, ytrain, CV_x, CV_y = self.split_CV(xtrain, ytrain, frac_cv)
 
         self.emul_func = self.cholesky_NN(xtrain,ytrain)
@@ -321,22 +348,43 @@ class emulator(regressor):
 
         #sys.exit()
 
-
         #self.emul_func = self.interpolator(xtrain,ytrain)
         #CV_y_err = CV_y - self.emul_func(CV_x)
         #self.emul_error = self.interpolator(CV_x,CV_y_err)
 
 
-
     def __call__(self,x):
+
+        #Check if list size has increased above some threshold
+        #If so, retrain.  Else, skip it
+        if (not self.trained and len(self.batchTrainX)>self.initTrainThresh) or (self.trained and len(self.batchTrainX)>self.otherTrainThresh):
+
+            if self.trained:
+
+                self.emul_func.xtrain = np.append(self.emul_func.xtrain, self.batchTrainX,axis=0)
+                self.emul_func.ytrain = np.append(self.emul_func.ytrain, self.batchTrainY,axis=0)
+
+
+                self.train(self.emul_func.xtrain,self.emul_func.ytrain)
+
+            else:
+
+                self.train(np.array(self.batchTrainX),np.array(self.batchTrainY))
+
+
+            #Empty the batch
+            self.batchTrainX = []
+            self.batchTrainY = []
+
 
         if self.trained:
             val, err = self.emul_func(x), self.emul_error(x)
         else:
-            val, err = self.true_func(x), 0.0
+            val, err = self.eval_true_func(x), 0.0
 
         goodval = test_good(val)
         gooderr = test_good(err)
+
         #Absolute error has to be under threshold, then checks fractional error vs threshold
         if gooderr:
             try:
@@ -350,13 +398,16 @@ class emulator(regressor):
                 gooderr = np.abs(err/val)<self.frac_err_local
 
 
+        #DEBUG
         if not goodval or not gooderr:
-            if self.trained:
-                print "Exact evaluation -----------",goodval,gooderr
-            val = self.true_func(x)
+            #if self.trained:
+            #    print "Exact evaluation -----------",goodval,gooderr
+            val = self.eval_true_func(x)
             err = 0.0
         else:
-            print "Emulated -------"
+            pass
+            #if self.trained:
+            #    print "Emulated -------", val, err, self.true_func(x)
 
         if self.output_err:
             return float(val), float(err)
@@ -365,6 +416,8 @@ class emulator(regressor):
 
 
 def main():
+
+    import emcee
 
     #Fake likelihood
     @emulator
@@ -379,6 +432,7 @@ def main():
 
     ndim = 2
 
+    #Make fake data
     if ndim==1:
         Xtrain = np.random.randn(1000)
         xlist = np.linspace(-3.0,3.0,11)
@@ -400,13 +454,16 @@ def main():
         raise RuntimeError('This number of dimensions has'+
                 ' not been implemented for testing yet.')
 
+
     Ytrain = np.array([loglike(X) for X in Xtrain])
 
-    loglike.train(Xtrain,Ytrain,frac_err_local=0.05,abs_err_local=1e0,output_err=True)
+    #loglike.train(Xtrain,Ytrain,frac_err_local=0.05,abs_err_local=1e0,output_err=True)
 
     for x in xlist:
         print "x", x
         print "val, err", loglike(x)
+
+
 
 
 
