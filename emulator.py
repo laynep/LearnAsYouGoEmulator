@@ -449,6 +449,10 @@ def main():
                 #np.random.normal(0.0,60.1),
                 #np.random.normal(1.0,2.1)])
 
+        else:
+            raise RuntimeError('This number of dimensions has'+
+                    ' not been implemented for testing yet.')
+
     if ndim==1:
         Xtrain = get_x(ndim)
         xlist = np.linspace(-3.0,3.0,11)
@@ -468,7 +472,6 @@ def main():
 
     ######################
     ######################
-    import emcee
 
     #Toy likelihood
     @emulator
@@ -483,21 +486,18 @@ def main():
     ######################
     ######################
 
-
-    p0 = np.array([get_x(ndim) for _ in xrange(nwalkers)])
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, loglike, threads=nthreads)
-
-
-
     for x in xlist:
         print "x", x
         print "val, err", loglike(x)
 
+    #Let's see if this works with a Monte Carlo method
+    import emcee
+
+    p0 = np.array([get_x(ndim) for _ in xrange(nwalkers)])
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, loglike, threads=nthreads)
+
     for result in sampler.sample(p0, iterations=niterations, storechain=False):
         fname = open('test.txt', "a")
-
-        #result[0] = chain
-        #result[1] = like
 
         for elmn in zip(result[1],result[0]):
             fname.write("%s " % str(elmn[0]))
@@ -507,11 +507,6 @@ def main():
 
     print "n exact evals:", loglike.nexact
     print "n emul evals:", loglike.nemul
-
-    sys.exit()
-
-
-
 
 
 if __name__=="__main__":
