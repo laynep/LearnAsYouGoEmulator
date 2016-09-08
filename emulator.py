@@ -429,7 +429,7 @@ def main():
     ndim = 2
 
     nwalkers = 20
-    niterations = 5000
+    niterations = 1000
     nthreads = 1
 
     #Make fake data
@@ -472,7 +472,6 @@ def main():
 
     ######################
     ######################
-
     #Toy likelihood
     @emulator
     def loglike(x):
