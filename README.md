@@ -25,3 +25,13 @@ of absolute (or fractional) error that one will allow for any local
 evaluation of the target function.  Any call to the emulator(x) that has
 a too-large error will be discarded and the actual function loglike(x)
 defined above will be evaluated instead.
+
+
+## Installation
+
+There are a small number of python dependencies.
+If you use anaconda you can create an appropriate environment by running
+```
+conda env create --file environment.yml
+```
+from this directory.

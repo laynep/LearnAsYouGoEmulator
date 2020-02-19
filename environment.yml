@@ -1,0 +1,10 @@
+name: LearnAsYouGoEmulator
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - numpy
+  - python=2.7
+  - matplotlib
+  - emcee=2.*     # Example is not compatible with emcee 3.*
+  - scipy
