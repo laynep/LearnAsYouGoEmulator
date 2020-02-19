@@ -4,6 +4,7 @@ Python implementation of the k-nearest neighbors Monte Carlo accelerator publish
 
 The basic usage of the emulator code should be something like this:
 
+```
 @emulator
 def loglike(x):
     if x.ndim!=1:
@@ -13,6 +14,7 @@ def loglike(x):
         return np.array(loglist)
     else:
         return np.array(-np.dot(x,x))
+```
 
 This decorates any Python scalar function and loglike is now an instance
 of the emulator class, where the __call__(x) function acts similarly to
