@@ -2,15 +2,14 @@
 
 from __future__ import print_function
 
-import numpy as np
-import scipy.interpolate as interp
-from scipy.spatial import cKDTree as KDTree
-import scipy.optimize as opt
 import math
-
 import sys
 
 import matplotlib.pyplot as plt
+import numpy as np
+import scipy.interpolate as interp
+import scipy.optimize as opt
+from scipy.spatial import cKDTree as KDTree
 
 
 def test_good(x):

@@ -11,3 +11,4 @@ dependencies:
   # Development
   - pre-commit
   - black
+  - isort
