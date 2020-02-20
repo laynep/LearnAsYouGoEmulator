@@ -347,7 +347,7 @@ class emulator(regressor):
         self.emul_error = self.emul_func.train_dist_error_model(CV_x,CV_y_err)
         self.emul_error2 = self.cholesky_NN(CV_x,CV_y_err)
 
-        #xtest =[2.0* np.array(np.random.randn(2)) for _ in xrange(10)]
+        #xtest =[2.0* np.array(np.random.randn(2)) for _ in range(10)]
         #for x in xtest:
         #    print("--------------")
         #    print("x", x)
@@ -462,8 +462,8 @@ def main():
 
     elif ndim==2:
 
-        Xtrain = np.array([get_x(ndim) for _ in xrange(10000)])
-        xlist = np.array([get_x(ndim) for _ in xrange(10)])
+        Xtrain = np.array([get_x(ndim) for _ in range(10000)])
+        xlist = np.array([get_x(ndim) for _ in range(10)])
 
     else:
         raise RuntimeError('This number of dimensions has'+
@@ -495,7 +495,7 @@ def main():
     #Let's see if this works with a Monte Carlo method
     import emcee
 
-    p0 = np.array([get_x(ndim) for _ in xrange(nwalkers)])
+    p0 = np.array([get_x(ndim) for _ in range(nwalkers)])
     sampler = emcee.EnsembleSampler(nwalkers, ndim, loglike, threads=nthreads)
 
     for result in sampler.sample(p0, iterations=niterations, storechain=False):
