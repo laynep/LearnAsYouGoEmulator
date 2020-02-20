@@ -1,4 +1,7 @@
 #!/bin/python
+
+from __future__ import print_function
+
 import numpy as np
 import scipy.interpolate as interp
 from scipy.spatial import cKDTree as KDTree
@@ -221,7 +224,7 @@ class regressor(object):
                     #bounds=((0.0,0.0,0.0),(np.inf,np.inf,np.inf)))
                     bounds=((0.0,0.0,0.0),(1e1,1e1,1e1)))
 
-            #print "this is bestfit:", bestfit
+            #print("this is bestfit:", bestfit)
 
             def new_error_model(xval):
                 xval = np.dot(self.L_mat,xval)
@@ -319,7 +322,7 @@ class emulator(regressor):
             Set to True if you do.
         """
 
-        print "RETRAINING!------------------------"
+        print("RETRAINING!------------------------")
 
         self.frac_err_local = frac_err_local
         self.abs_err_local = abs_err_local
@@ -346,12 +349,12 @@ class emulator(regressor):
 
         #xtest =[2.0* np.array(np.random.randn(2)) for _ in xrange(10)]
         #for x in xtest:
-        #    print "--------------"
-        #    print "x", x
-        #    print "prediction:", self.emul_func(x)
-        #    print "error param:", self.emul_error(x)
-        #    print "error nonparam:", self.emul_error2(x)
-        #    print "real val, real err:", self.true_func(x), self.true_func(x) - self.emul_func(x)
+        #    print("--------------")
+        #    print("x", x)
+        #    print("prediction:", self.emul_func(x))
+        #    print("error param:", self.emul_error(x))
+        #    print("error nonparam:", self.emul_error2(x))
+        #    print("real val, real err:", self.true_func(x), self.true_func(x) - self.emul_func(x))
 
         #sys.exit()
 
@@ -408,14 +411,14 @@ class emulator(regressor):
         #DEBUG
         if not goodval or not gooderr:
             #if self.trained:
-            #    print "Exact evaluation -----------",goodval,gooderr
+            #    print("Exact evaluation -----------",goodval,gooderr)
             self.nexact += 1
             val = self.eval_true_func(x)
             err = 0.0
         else:
             if self.trained:
                 self.nemul += 1
-                #print "Emulated -------", val, err#, self.true_func(x)
+                #print("Emulated -------", val, err#, self.true_func(x))
 
         if self.output_err:
             return float(val), float(err)
@@ -486,8 +489,8 @@ def main():
     ######################
 
     for x in xlist:
-        print "x", x
-        print "val, err", loglike(x)
+        print("x", x)
+        print("val, err", loglike(x))
 
     #Let's see if this works with a Monte Carlo method
     import emcee
@@ -504,8 +507,8 @@ def main():
                 fname.write("%s " % str(k))
             fname.write("\n")
 
-    print "n exact evals:", loglike.nexact
-    print "n emul evals:", loglike.nemul
+    print("n exact evals:", loglike.nexact)
+    print("n emul evals:", loglike.nemul)
 
 
 if __name__=="__main__":
