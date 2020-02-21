@@ -5,11 +5,11 @@ from __future__ import print_function
 import math
 import sys
 
-import matplotlib.pyplot as plt
-import numpy as np
-import scipy.interpolate as interp
-import scipy.optimize as opt
-from scipy.spatial import cKDTree as KDTree
+import matplotlib.pyplot as plt  # type: ignore
+import numpy as np  # type: ignore
+import scipy.interpolate as interp  # type: ignore
+import scipy.optimize as opt  # type: ignore
+from scipy.spatial import cKDTree as KDTree  # type: ignore
 
 
 def test_good(x):
@@ -500,7 +500,7 @@ def main():
         print("val, err", loglike(x))
 
     # Let's see if this works with a Monte Carlo method
-    import emcee
+    import emcee  # type: ignore
 
     p0 = np.array([get_x(ndim) for _ in range(nwalkers)])
     sampler = emcee.EnsembleSampler(nwalkers, ndim, loglike, threads=nthreads)
