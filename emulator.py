@@ -115,7 +115,7 @@ class regressor(object):
         if ndimx > 1:
             raise TypeError(
                 "The interpolator is not yet set up for higher dimensions than ",
-                ndim - 1,
+                ndimx - 1,
             )
 
         interp_funct = interp.interp1d(xdata, ydata)
