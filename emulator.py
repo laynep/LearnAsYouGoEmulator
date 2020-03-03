@@ -444,8 +444,23 @@ def main():
     niterations = 1000
     nthreads = 1
 
-    # Make fake data
+    ######################
+    ######################
+    # Toy likelihood
+    @emulator
+    def loglike(x):
+        if x.ndim != 1:
+            loglist = []
+            for x0 in x:
+                loglist.append(-np.dot(x0, x0))
+            return np.array(loglist)
+        else:
+            return np.array(-np.dot(x, x))
 
+    ######################
+    ######################
+
+    # Make fake data
     def get_x(ndim):
 
         if ndim == 1:
@@ -479,24 +494,10 @@ def main():
             "This number of dimensions has not been implemented for testing yet."
         )
 
-    # Ytrain = np.array([loglike(X) for X in Xtrain])
-    # loglike.train(Xtrain,Ytrain,frac_err_local=0.05,abs_err_local=1e0,output_err=True)
-
-    ######################
-    ######################
-    # Toy likelihood
-    @emulator
-    def loglike(x):
-        if x.ndim != 1:
-            loglist = []
-            for x0 in x:
-                loglist.append(-np.dot(x0, x0))
-            return np.array(loglist)
-        else:
-            return np.array(-np.dot(x, x))
-
-    ######################
-    ######################
+    Ytrain = np.array([loglike(X) for X in Xtrain])
+    loglike.train(
+        Xtrain, Ytrain, frac_err_local=0.05, abs_err_local=1e0, output_err=False
+    )
 
     for x in xlist:
         print("x", x)
