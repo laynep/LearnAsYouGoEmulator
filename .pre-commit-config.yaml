@@ -20,6 +20,11 @@ repos:
       - id: isort
         types: ['python']
 
+-   repo: https://gitlab.com/pycqa/flake8
+    rev: '3.7.9'  # pick a git hash / tag to point to
+    hooks:
+    -   id: flake8
+
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: 'v0.761'  # Use the sha / tag you want to point at
     hooks:
