@@ -241,7 +241,7 @@ class regressor(object):
                 # dist = dist/bestfit[2]
 
                 err_guess = bestfit[0] * dist + bestfit[1] * dist ** bestfit[2]
-                rand_sign = np.random.rand() - 0.5
+                # rand_sign = np.random.rand() - 0.5
                 # err_guess *= 1.0 if rand_sign>0.0 else -1.0
 
                 return err_guess
