@@ -406,12 +406,16 @@ class emulator(regressor):
         if gooderr:
             try:
                 gooderr = all(np.abs(err) < self.abs_err_local)
-            except:
+            except:  # noqa: E722
+                # Looks safe to assume for now that no unwanted exceptions would be caught
+                # TODO: specify exception type and re-enable lint
                 gooderr = np.abs(err) < self.abs_err_local
         if gooderr:
             try:
                 gooderr = all(np.abs(err / val) < self.frac_err_local)
-            except:
+            except:  # noqa: E722
+                # Looks safe to assume for now that no unwanted exceptions would be caught
+                # TODO: specify exception type and re-enable lint
                 gooderr = np.abs(err / val) < self.frac_err_local
 
         # DEBUG
