@@ -334,7 +334,7 @@ class emulator(regressor):
 
         self.trained = True
 
-        if not output_err == False:
+        if output_err is not False:
             # raise Exception('Do not currently have capability to output the error to the chain.')
             pass
 
