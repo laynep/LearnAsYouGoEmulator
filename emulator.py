@@ -3,9 +3,7 @@
 from __future__ import print_function
 
 import math
-import sys
 
-import matplotlib.pyplot as plt  # type: ignore
 import numpy as np  # type: ignore
 import scipy.interpolate as interp  # type: ignore
 import scipy.optimize as opt  # type: ignore
@@ -151,10 +149,11 @@ class regressor(object):
             self.transf_x = np.array([np.dot(self.L_mat, x) for x in xdata])
 
             # DEBUG
+            # import matplotlib.pyplot as plt  # type: ignore
             # plt.plot(xdata[:,0],xdata[:,1],'.',color='r')
             # plt.plot(self.transf_x[:,0],self.transf_x[:,1],'.')
             # plt.show()
-            # sys.exit()
+            # import sys; sys.exit()
 
             # Store training
             self.ytrain = ydata
@@ -249,6 +248,7 @@ class regressor(object):
                 return err_guess
 
             # DEBUG
+            # import matplotlib.pyplot as plt  # type: ignore
             # plt.plot(dist_list, np.abs(ytrain),'bo')
             # plt.plot(dist_list, map(new_error_model,xtrain),'ro')
             # plt.show()
@@ -361,7 +361,7 @@ class emulator(regressor):
         #    print("error nonparam:", self.emul_error2(x))
         #    print("real val, real err:", self.true_func(x), self.true_func(x) - self.emul_func(x))
 
-        # sys.exit()
+        # import sys; sys.exit()
 
         # self.emul_func = self.interpolator(xtrain,ytrain)
         # CV_y_err = CV_y - self.emul_func(CV_x)
