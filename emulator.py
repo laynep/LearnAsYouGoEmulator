@@ -462,8 +462,7 @@ def main():
 
         else:
             raise RuntimeError(
-                "This number of dimensions has"
-                + " not been implemented for testing yet."
+                "This number of dimensions has not been implemented for testing yet."
             )
 
     if ndim == 1:
@@ -477,7 +476,7 @@ def main():
 
     else:
         raise RuntimeError(
-            "This number of dimensions has" + " not been implemented for testing yet."
+            "This number of dimensions has not been implemented for testing yet."
         )
 
     # Ytrain = np.array([loglike(X) for X in Xtrain])
