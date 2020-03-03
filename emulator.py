@@ -79,7 +79,6 @@ class regressor(object):
 
         # Separate into training and cross-validation sets with 80-20 split
         num_cv = int(frac_cv * xdata.shape[0])
-        num_train = xdata.shape[0] - num_cv
 
         # Pre-process data
         # mean_vals = np.array([np.mean(col) for col in xdata.T])
