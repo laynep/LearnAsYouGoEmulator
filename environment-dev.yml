@@ -14,3 +14,4 @@ dependencies:
   - isort
   - flake8
   - mypy
+  - pytest
