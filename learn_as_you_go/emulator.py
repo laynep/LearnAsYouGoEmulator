@@ -10,7 +10,7 @@ import scipy.optimize as opt  # type: ignore
 from scipy.spatial import cKDTree as KDTree  # type: ignore
 
 
-def test_good(x):
+def check_good(x):
     """Tests if scalar is infinity, NaN, or None.
 
     Parameters
@@ -184,10 +184,10 @@ class regressor(object):
                 y_predict = np.array(
                     [np.average(y0, weights=weight) for y0 in nearest_y.T]
                 )
-                testgood = all([test_good(y) for y in y_predict])
+                testgood = all([check_good(y) for y in y_predict])
             elif self.ytrain.ndim == 1:
                 y_predict = np.average(nearest_y, weights=weight)
-                testgood = test_good(y_predict)
+                testgood = check_good(y_predict)
             else:
                 raise Exception("The dimension of y training data is weird")
 
@@ -398,8 +398,8 @@ class emulator(regressor):
         else:
             val, err = self.eval_true_func(x), 0.0
 
-        goodval = test_good(val)
-        gooderr = test_good(err)
+        goodval = check_good(val)
+        gooderr = check_good(err)
 
         # Absolute error has to be under threshold, then checks fractional error vs threshold
         if gooderr:
