@@ -139,6 +139,13 @@ class regressor(object):
             # Find data covariance
             cov = np.cov(xdata.T)
 
+            if cov.shape == () and xdata.shape[1] == 1:
+                # Handle input for a function on scalars
+                # np.cov returns a scalar if xdata.T is a column vector, but
+                # np.linalg.cholesky requires a 2-d array.
+                # TODO: check more formally that this change makes sense
+                cov = np.array([[cov]])
+
             # Cholesky decompose to make new basis
             L_mat = np.linalg.cholesky(cov)
             self.L_mat = np.linalg.inv(L_mat)

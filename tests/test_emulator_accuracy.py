@@ -7,7 +7,7 @@ DEFAULT_ABS_ERR = 0.05
 DEFAULT_REL_ERR = 1.0
 
 
-@pytest.mark.parametrize("xdim", [pytest.param(1, marks=pytest.mark.xfail), 2, 3])
+@pytest.mark.parametrize("xdim", [1, 2, 3])
 def test_constant(xdim):
     """
     Test that a constant function can be emulated
@@ -31,7 +31,7 @@ def test_constant(xdim):
     assert np.isclose(constant(x), CONSTANT)
 
 
-@pytest.mark.parametrize("xdim", [pytest.param(1, marks=pytest.mark.xfail), 2, 3])
+@pytest.mark.parametrize("xdim", [1, 2, 3])
 def test_dot(xdim):
     """
     Test that a simple non-constant function can be emulated
@@ -61,7 +61,7 @@ def test_dot(xdim):
     assert np.abs((emul_val - true_val) / true_val) < DEFAULT_REL_ERR
 
 
-@pytest.mark.parametrize("xdim", [pytest.param(1, marks=pytest.mark.xfail), 2, 3])
+@pytest.mark.parametrize("xdim", [1, 2, 3])
 def test_sin(xdim):
     """
     Test that a simple non-constant function can be emulated
