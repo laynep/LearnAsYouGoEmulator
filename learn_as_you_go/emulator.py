@@ -15,34 +15,26 @@ def check_good(x):
 
     Parameters
     ----------
-    x : scalar
+    x : scalar or numpy.ndarray
         Input to test.
 
     Results
     -------
     good : logical
-        False if x is inf, NaN, or None; True otherwise."""
+        False if x is or contains inf, NaN, or None; True otherwise.
+    """
 
-    good = False
-
-    # DEBUG
-    return True
-
-    if x.ndim == 0:
-
-        if x == np.inf or x == -np.inf or x is None or math.isnan(x):
-            good = False
+    if type(x) == np.ndarray:
+        if np.all(np.isfinite(x)):
+            return True
         else:
-            good = True
+            return False
 
     else:
-        x0 = x.flatten()
-        if any(x0 == np.inf) or any(x == -np.inf) or any(x is None) or math.isnan(x0):
-            good = False
+        if x == np.inf or x == -np.inf or x is None or math.isnan(x):
+            return False
         else:
-            good = True
-
-    return good
+            return True
 
 
 class regressor(object):

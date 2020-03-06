@@ -13,13 +13,12 @@ import pytest  # type: ignore
 from learn_as_you_go.emulator import check_good
 
 
-@pytest.mark.parametrize("test_input", [0, 1, 1.0])
+@pytest.mark.parametrize("test_input", [0, 1, 1.0, np.array(1.0)])
 def test_scalar_good(test_input):
 
     assert check_good(test_input)
 
 
-@pytest.mark.xfail
 @pytest.mark.parametrize(
     "test_input", [math.inf, -math.inf, math.nan, np.inf, -np.inf, np.nan, None]
 )
@@ -37,7 +36,6 @@ def test_array_good(test_input):
     assert check_good(test_input)
 
 
-@pytest.mark.xfail
 @pytest.mark.parametrize(
     "test_input", [math.inf, -math.inf, math.nan, np.inf, -np.inf, np.nan, None]
 )
