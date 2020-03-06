@@ -1,5 +1,5 @@
-import numpy as np
-import pytest
+import numpy as np  # type: ignore
+import pytest  # type: ignore
 
 from learn_as_you_go.emulator import emulator
 

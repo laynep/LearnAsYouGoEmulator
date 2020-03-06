@@ -6,7 +6,7 @@ Developer install
 Run following command in prompt/terminal:
     pip install -e .
 """
-import setuptools
+import setuptools  # type: ignore
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
