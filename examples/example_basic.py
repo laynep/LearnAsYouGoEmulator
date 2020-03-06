@@ -2,6 +2,7 @@
 An example use of the `learn_as_you_go` package
 """
 
+import matplotlib.pyplot as plt  # type: ignore
 import numpy as np
 
 from learn_as_you_go.emulator import emulator
@@ -69,6 +70,38 @@ def main():
     for x in xlist:
         print("x", x)
         print("val, err", loglike(x))
+
+    # Plot an example
+    assert loglike.trained
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    x_len = 100
+
+    x_data_plot = np.zeros((x_len, ndim))
+    for i in range(ndim):
+        x_data_plot[:, i] = np.linspace(0, 1, x_len)
+
+    y_true = np.array([loglike.true_func(x) for x in x_data_plot])
+    y_emul = np.array([loglike(x) for x in x_data_plot])
+    y_emul_raw = np.array([loglike.emul_func(x) for x in x_data_plot])
+
+    ax.plot(x_data_plot[..., 0], y_true, label="true", color="black")
+    ax.scatter(x_data_plot[..., 0], y_emul, label="emulated", marker="+")
+    ax.scatter(
+        x_data_plot[..., 0],
+        y_emul_raw,
+        label="emulated\n no error estimation",
+        marker="+",
+    )
+
+    ax.legend()
+
+    ax.set_xlabel("Input")
+    ax.set_ylabel("Output")
+
+    fig.savefig("check.png")
 
 
 def test_main():
