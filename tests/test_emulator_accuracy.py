@@ -1,7 +1,8 @@
 import numpy as np  # type: ignore
 import pytest  # type: ignore
 
-from learn_as_you_go.emulator import emulator
+# TODO: remove NOQA when isort is fixed
+from learn_as_you_go.emulator import emulator  # NOQA
 
 DEFAULT_ABS_ERR = 0.05
 DEFAULT_REL_ERR = 1.0

@@ -4,7 +4,8 @@ An example use of the `learn_as_you_go` package
 
 import numpy as np  # type: ignore
 
-from learn_as_you_go.emulator import emulator
+# TODO: remove NOQA when isort is fixed
+from learn_as_you_go.emulator import emulator  # NOQA
 
 
 def main():
