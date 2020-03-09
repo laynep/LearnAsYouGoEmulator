@@ -3,7 +3,6 @@
 from __future__ import print_function
 
 import numpy as np  # type: ignore
-import scipy.interpolate as interp  # type: ignore
 
 from .util import check_good
 
@@ -60,39 +59,6 @@ class regressor(object):
         ytrain = ydata[0:-num_cv]
 
         return xtrain, ytrain, x_cv, y_cv
-
-    def interpolator(self, xdata, ydata):
-
-        if xdata.shape[0] != ydata.shape[0]:
-            raise TypeError("The x and y data do not have the same number of elements.")
-
-        ndimx = len(xdata.shape)
-        ndimy = len(ydata.shape)
-
-        if ndimy > 1:
-            raise TypeError(
-                "Cannot interpolate when range has higher dimensions than 1."
-            )
-
-        if ndimx > 1:
-            raise TypeError(
-                "The interpolator is not yet set up for higher dimensions than ",
-                ndimx - 1,
-            )
-
-        interp_funct = interp.interp1d(xdata, ydata)
-        xmin = np.min(xdata)
-        xmax = np.max(xdata)
-
-        @np.vectorize
-        def predict(x):
-            if x < xmin or x > xmax:
-                pred = np.inf
-            else:
-                pred = interp_funct(x)
-            return pred
-
-        return predict
 
 
 # Emulator
@@ -216,10 +182,6 @@ class emulator(regressor):
         #    print("real val, real err:", self.true_func(x), self.true_func(x) - self.emul_func(x))
 
         # import sys; sys.exit()
-
-        # self.emul_func = self.interpolator(xtrain,ytrain)
-        # CV_y_err = CV_y - self.emul_func(CV_x)
-        # self.emul_error = self.interpolator(CV_x,CV_y_err)
 
     def __call__(self, x):
 
