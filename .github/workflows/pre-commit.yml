@@ -1,7 +1,7 @@
 # https://github.com/pre-commit/action
 # Run all pre-commit lints
 
-name: pre-commit
+name: lints
 
 on:
   - push
