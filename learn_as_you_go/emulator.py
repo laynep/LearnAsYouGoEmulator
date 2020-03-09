@@ -7,62 +7,8 @@ import numpy as np  # type: ignore
 from .util import check_good
 
 
-class regressor(object):
-    """Basic regression techniques."""
-
-    def split_CV(self, xdata, ydata, frac_cv):
-        """Splits a dataset into a cross-validation and training set.  Shuffles the data.
-
-        Parameters
-        ----------
-        xdata : ndarray
-            Independent variable of dataset.  Assumed to be a set of vectors in R^n
-
-        ydata : ndarray
-            Dependent variable of dataset.  Assumed to be a set of vectors in R^m.
-
-        frac_cv : scalar
-            Fraction of dataset to be put into the cross-validation set.
-
-        Results
-        -------
-        xtrain : ndarray
-            Independent variable of training set.  Assumed to be a set of vectors in R^n
-
-        ytrain : ndarray
-            Dependent variable of training set.  Assumed to be a set of vectors in R^m.
-
-        x_cv : ndarray
-            Independent variable of cross-validation set.  Assumed to be a set of vectors in R^n
-
-        y_cv : ndarray
-            Dependent variable of cross-validation set.  Assumed to be a set of vectors in R^m.
-        """
-
-        # Separate into training and cross-validation sets with 80-20 split
-        num_cv = int(frac_cv * xdata.shape[0])
-
-        # Pre-process data
-        # mean_vals = np.array([np.mean(col) for col in xdata.T])
-        # rms_vals = np.array([np.sqrt(np.mean(col**2)) for col in xdata.T])
-
-        rand_subset = np.arange(xdata.shape[0])
-        np.random.shuffle(rand_subset)
-
-        xdata = np.array([xdata[rand_index] for rand_index in rand_subset])
-        ydata = np.array([ydata[rand_index] for rand_index in rand_subset])
-
-        x_cv = xdata[-num_cv:]
-        y_cv = ydata[-num_cv:]
-
-        xtrain = xdata[0:-num_cv]
-        ytrain = ydata[0:-num_cv]
-
-        return xtrain, ytrain, x_cv, y_cv
-
-
 # Emulator
-class emulator(regressor):
+class emulator(object):
     """
     A class that contains logic for learning as you go
 
@@ -183,6 +129,56 @@ class emulator(regressor):
         #    print("real val, real err:", self.true_func(x), self.true_func(x) - self.emul_func(x))
 
         # import sys; sys.exit()
+
+    def split_CV(self, xdata, ydata, frac_cv):
+        """Splits a dataset into a cross-validation and training set.  Shuffles the data.
+
+        Parameters
+        ----------
+        xdata : ndarray
+            Independent variable of dataset.  Assumed to be a set of vectors in R^n
+
+        ydata : ndarray
+            Dependent variable of dataset.  Assumed to be a set of vectors in R^m.
+
+        frac_cv : scalar
+            Fraction of dataset to be put into the cross-validation set.
+
+        Results
+        -------
+        xtrain : ndarray
+            Independent variable of training set.  Assumed to be a set of vectors in R^n
+
+        ytrain : ndarray
+            Dependent variable of training set.  Assumed to be a set of vectors in R^m.
+
+        x_cv : ndarray
+            Independent variable of cross-validation set.  Assumed to be a set of vectors in R^n
+
+        y_cv : ndarray
+            Dependent variable of cross-validation set.  Assumed to be a set of vectors in R^m.
+        """
+
+        # Separate into training and cross-validation sets with 80-20 split
+        num_cv = int(frac_cv * xdata.shape[0])
+
+        # Pre-process data
+        # mean_vals = np.array([np.mean(col) for col in xdata.T])
+        # rms_vals = np.array([np.sqrt(np.mean(col**2)) for col in xdata.T])
+
+        rand_subset = np.arange(xdata.shape[0])
+        np.random.shuffle(rand_subset)
+
+        xdata = np.array([xdata[rand_index] for rand_index in rand_subset])
+        ydata = np.array([ydata[rand_index] for rand_index in rand_subset])
+
+        x_cv = xdata[-num_cv:]
+        y_cv = ydata[-num_cv:]
+
+        xtrain = xdata[0:-num_cv]
+        ytrain = ydata[0:-num_cv]
+
+        return xtrain, ytrain, x_cv, y_cv
 
     def __call__(self, x):
 
