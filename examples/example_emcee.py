@@ -5,7 +5,7 @@ An example use of the `learn_as_you_go` package
 import numpy as np  # type: ignore
 
 # TODO: remove NOQA when isort is fixed
-from learn_as_you_go.emulator import emulator  # NOQA
+from learn_as_you_go import CholeskyNnEmulator as Emulator  # NOQA
 
 
 def main():
@@ -19,7 +19,7 @@ def main():
     ######################
     ######################
     # Toy likelihood
-    @emulator
+    @Emulator
     def loglike(x):
         if x.ndim != 1:
             loglist = []

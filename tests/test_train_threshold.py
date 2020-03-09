@@ -2,7 +2,7 @@ import numpy as np  # type: ignore
 import pytest  # type: ignore
 
 # TODO: remove NOQA when isort is fixed
-from learn_as_you_go.emulator import emulator  # NOQA
+from learn_as_you_go import CholeskyNnEmulator as Emulator  # NOQA
 
 
 @pytest.mark.xfail
@@ -18,7 +18,7 @@ def test_default_initial_training_threshold():
     CONSTANT = 1.0
     training_threshold = 1000
 
-    @emulator
+    @Emulator
     def constant(x):
         return CONSTANT
 
@@ -43,7 +43,7 @@ def test_custom_initial_training_threshold():
     training_threshold = 1000
     retraining_threshold = 1000
 
-    @emulator
+    @Emulator
     def constant(x):
         return CONSTANT
 

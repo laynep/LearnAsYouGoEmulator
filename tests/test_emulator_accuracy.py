@@ -2,7 +2,7 @@ import numpy as np  # type: ignore
 import pytest  # type: ignore
 
 # TODO: remove NOQA when isort is fixed
-from learn_as_you_go.emulator import emulator  # NOQA
+from learn_as_you_go import CholeskyNnEmulator as Emulator  # NOQA
 
 DEFAULT_ABS_ERR = 0.05
 DEFAULT_REL_ERR = 1.0
@@ -18,7 +18,7 @@ def test_constant(xdim):
 
     CONSTANT = 1.0
 
-    @emulator
+    @Emulator
     def constant(x):
         return CONSTANT
 
@@ -43,7 +43,7 @@ def test_dot(xdim):
     def true_function(x):
         return np.dot(x, x)
 
-    @emulator
+    @Emulator
     def emulated_function(x):
         return true_function(x)
 
@@ -75,7 +75,7 @@ def test_sin(xdim):
     def true_function(x):
         return np.sin(10 * x[0])
 
-    @emulator
+    @Emulator
     def emulated_function(x):
         return true_function(x)
 
