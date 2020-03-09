@@ -47,7 +47,7 @@ def test_custom_initial_training_threshold():
     def constant(x):
         return CONSTANT
 
-    emulator.overrideDefaults(training_threshold, retraining_threshold)
+    constant.overrideDefaults(training_threshold, retraining_threshold)
 
     for x in [np.random.uniform(size=xdim) for _ in range(training_threshold)]:
         assert not constant.trained
