@@ -5,5 +5,6 @@ channels:
 dependencies:
   - numpy
   - matplotlib
+  - pytorch
   - emcee=2.*     # Example is not compatible with emcee 3.*
   - scipy

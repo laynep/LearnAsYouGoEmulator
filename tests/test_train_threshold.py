@@ -4,7 +4,6 @@ import pytest  # type: ignore
 # TODO: remove NOQA when isort is fixed
 from learn_as_you_go import CholeskyNnEmulator  # NOQA
 
-
 XDIM = 1
 CONSTANT = 1.0
 Emulator = CholeskyNnEmulator

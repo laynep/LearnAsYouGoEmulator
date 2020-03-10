@@ -22,7 +22,13 @@ setuptools.setup(
     author_email="layne.c.price@gmail.com",  # email
     # license='MIT',  # licensing
     packages=setuptools.find_packages(),
-    install_requires=["matplotlib", "numpy", "scipy", "emcee>=2,<3"],  # dependencies
+    install_requires=[
+        "matplotlib",
+        "numpy",
+        "torch",
+        "scipy",
+        "emcee>=2,<3",
+    ],  # dependencies
     classifiers=[
         "Programming Language :: Python :: 3",
         # "License :: ",  # TODO: Licence
