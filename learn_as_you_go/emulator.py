@@ -168,6 +168,7 @@ class emulator(regressor):
 
         # Set the emulator function by calling to the subclass's particular method
         CV_y_err = CV_y - np.array([self.emul_func(x) for x in CV_x])
+        assert CV_y.shape == CV_y_err.shape  # Bizarre bugs if this isn't true
         self.set_emul_error_func(CV_x, CV_y_err)
 
         # self.emul_error2 = self.cholesky_NN(CV_x, CV_y_err)

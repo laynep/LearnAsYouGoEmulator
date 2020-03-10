@@ -2,48 +2,74 @@ import numpy as np  # type: ignore
 import pytest  # type: ignore
 
 # TODO: remove NOQA when isort is fixed
-from learn_as_you_go import CholeskyNnEmulator as Emulator  # NOQA
+from learn_as_you_go import CholeskyNnEmulator  # NOQA
+from learn_as_you_go import InterpolationEmulator  # NOQA
 
 DEFAULT_ABS_ERR = 0.05
 DEFAULT_REL_ERR = 1.0
 
+CONSTANT = 1.0
 
+
+def true_function_constant(x):
+    return CONSTANT
+
+
+def true_function_dot(x):
+    return np.dot(x, x)
+
+
+def true_function_sin(x):
+    return np.sin(10 * x[0])
+
+
+@pytest.mark.parametrize(
+    "true_function", [true_function_constant, true_function_dot, true_function_sin]
+)
 @pytest.mark.parametrize("xdim", [1, 2, 3])
-def test_constant(xdim):
+def test_cholesky(true_function, xdim):
+    """
+    Test that simple functions can be emulated
+
+    TODO: test that the emulated function is called, not the true function.
+    """
+
+    @CholeskyNnEmulator
+    def emulated_function(x):
+        return true_function(x)
+
+    np.random.seed(0)
+    for x in [np.random.uniform(size=xdim) for _ in range(1000)]:
+        emulated_function(x)
+
+    assert emulated_function.trained
+
+    x = 0.5 * np.ones(xdim)
+
+    true_val = true_function(x)
+    emul_val = emulated_function(x)
+
+    assert np.abs(true_val - emul_val) < DEFAULT_ABS_ERR
+    assert np.abs((emul_val - true_val) / true_val) < DEFAULT_REL_ERR
+
+
+@pytest.mark.parametrize(
+    "true_function",
+    [
+        true_function_constant,
+        pytest.param(true_function_dot, marks=pytest.mark.xfail),
+        pytest.param(true_function_sin, marks=pytest.mark.xfail),
+    ],
+)
+@pytest.mark.parametrize("xdim", [1])
+def test_constant_interpolation(true_function, xdim):
     """
     Test that a constant function can be emulated
 
     TODO: test that the emulatted function is called, not the true function.
     """
 
-    CONSTANT = 1.0
-
-    @Emulator
-    def constant(x):
-        return CONSTANT
-
-    for x in [np.random.uniform(size=xdim) for _ in range(1000)]:
-        constant(x)
-
-    assert constant.trained
-
-    x = 0.5 * np.ones(xdim)
-
-    assert np.isclose(constant(x), CONSTANT)
-
-
-@pytest.mark.parametrize("xdim", [1, 2, 3])
-def test_dot(xdim):
-    """
-    Test that a simple non-constant function can be emulated
-
-    TODO: test that the emulated function is called, not the true function.
-    """
-
-    def true_function(x):
-        return np.dot(x, x)
-
-    @Emulator
+    @InterpolationEmulator
     def emulated_function(x):
         return true_function(x)
 
@@ -55,40 +81,4 @@ def test_dot(xdim):
 
     x = 0.5 * np.ones(xdim)
 
-    true_val = true_function(x)
-    emul_val = emulated_function(x)
-
-    assert np.abs(true_val - emul_val) < DEFAULT_ABS_ERR
-    assert np.abs((emul_val - true_val) / true_val) < DEFAULT_REL_ERR
-
-
-@pytest.mark.parametrize("xdim", [1, 2, 3])
-def test_sin(xdim):
-    """
-    Test that a simple non-constant function can be emulated
-
-    This is a sinusoid in the first dimension, constant in others.
-
-    TODO: test that the emulated function is called, not the true function.
-    """
-
-    def true_function(x):
-        return np.sin(10 * x[0])
-
-    @Emulator
-    def emulated_function(x):
-        return true_function(x)
-
-    np.random.seed(0)
-    for x in [np.random.uniform(size=xdim) for _ in range(1000)]:
-        emulated_function(x)
-
-    assert emulated_function.trained
-
-    x = 0.5 * np.ones(xdim)
-
-    true_val = true_function(x)
-    emul_val = emulated_function(x)
-
-    assert np.abs(true_val - emul_val) < DEFAULT_ABS_ERR
-    assert np.abs((emul_val - true_val) / true_val) < DEFAULT_REL_ERR
+    assert np.isclose(emulated_function(x), CONSTANT)

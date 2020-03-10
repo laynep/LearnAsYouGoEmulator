@@ -23,31 +23,33 @@ class InterpolationEmulator(emulator):
     `learn_as_you_go.emulator.emulator` class.
     """
 
-    def interpolator(self, xdata, ydata):
+    def interpolator(self, xdata: np.ndarray, ydata: np.ndarray):
 
-        if xdata.shape[0] != ydata.shape[0]:
-            raise TypeError("The x and y data do not have the same number of elements.")
-
-        ndimx = len(xdata.shape)
-        ndimy = len(ydata.shape)
-
-        if ndimy > 1:
+        if ydata.ndim > 1:
             raise TypeError(
                 "Cannot interpolate when range has higher dimensions than 1."
             )
 
-        if ndimx > 1:
+        if xdata.shape[1] > 1:
             raise TypeError(
                 "The interpolator is not yet set up for higher dimensions than ",
-                ndimx - 1,
+                xdata.ndim - 1,
             )
+
+        if xdata.shape[0] != ydata.shape[0]:
+            raise TypeError("The x and y data do not have the same number of elements.")
+
+        # Reshape data from Nx1 matrix to N-vector
+        xdata = xdata.T[0]
 
         interp_funct = interp.interp1d(xdata, ydata)
         xmin = np.min(xdata)
         xmax = np.max(xdata)
 
-        @np.vectorize
         def predict(x):
+            # Reshape data from 1x1 matrix to scalar
+            x = x.T[0]
+
             if x < xmin or x > xmax:
                 pred = np.inf
             else:
