@@ -5,10 +5,10 @@ from typing import Callable
 import numpy as np  # type: ignore
 import scipy.interpolate as interp  # type: ignore
 
-from .emulator import emulator
+from .learner import Learner
 
 
-class InterpolationEmulator(emulator):
+class InterpolationEmulator(Learner):
     """
     An emulator based on interpolation
 

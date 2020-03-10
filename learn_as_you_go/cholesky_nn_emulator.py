@@ -6,11 +6,11 @@ import numpy as np  # type: ignore
 import scipy.optimize as opt  # type: ignore
 from scipy.spatial import cKDTree as KDTree  # type: ignore
 
-from .emulator import emulator
+from .learner import Learner
 from .util import check_good
 
 
-class CholeskyNnEmulator(emulator):
+class CholeskyNnEmulator(Learner):
     """
     An emulator based on Cholesky decomposition and nearest neighbours
 

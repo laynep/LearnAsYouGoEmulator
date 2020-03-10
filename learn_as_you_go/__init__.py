@@ -1,6 +1,5 @@
-# import learn_as_you_go.emulator
-from . import emulator
 from .cholesky_nn_emulator import CholeskyNnEmulator
 from .interpolation_emulator import InterpolationEmulator
+from .learner import Learner
 
-__all__ = ["emulator", "CholeskyNnEmulator", "InterpolationEmulator"]
+__all__ = ["Learner", "CholeskyNnEmulator", "InterpolationEmulator"]

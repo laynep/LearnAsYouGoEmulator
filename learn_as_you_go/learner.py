@@ -8,7 +8,7 @@ from .util import check_good
 
 
 # Emulator
-class emulator(object):
+class Learner(object):
     """
     A class that contains logic for learning as you go
 
