@@ -25,7 +25,7 @@ class InterpolationEmulator(Learner):
 
     def interpolator(self, xdata: np.ndarray, ydata: np.ndarray):
 
-        if ydata.ndim > 1:
+        if ydata.shape[1] > 1:
             raise TypeError(
                 "Cannot interpolate when range has higher dimensions than 1."
             )
@@ -41,6 +41,7 @@ class InterpolationEmulator(Learner):
 
         # Reshape data from Nx1 matrix to N-vector
         xdata = xdata.T[0]
+        ydata = ydata.T[0]
 
         interp_funct = interp.interp1d(xdata, ydata)
         xmin = np.min(xdata)

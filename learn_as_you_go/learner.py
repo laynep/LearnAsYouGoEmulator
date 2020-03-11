@@ -2,6 +2,8 @@
 
 from __future__ import print_function
 
+from typing import Callable, List
+
 import numpy as np  # type: ignore
 
 from .util import check_good
@@ -22,8 +24,11 @@ class Learner(object):
 
     def __init__(self, true_func):
 
-        self.true_func = true_func
+        self.true_func: Callable[np.ndarray, np.ndarray] = true_func
         self.emul_func = self.true_func
+        self.emul_error: Callable[
+            np.ndarray, float
+        ] = lambda _: 0.0  # The initial function is exact
 
         self.frac_err_local = 0.0
         self.abs_err_local = 0.0
@@ -31,8 +36,8 @@ class Learner(object):
 
         self.trained = False
 
-        self.batchTrainX = []
-        self.batchTrainY = []
+        self.batchTrainX: List[np.ndarray] = []
+        self.batchTrainY: List[np.ndarray] = []
 
         self.initTrainThresh = 1000
         self.otherTrainThresh = 5000
@@ -48,12 +53,12 @@ class Learner(object):
         self.initTrainThresh = initTrainThresh
         self.otherTrainThresh = otherTrainThresh
 
-    def eval_true_func(self, x):
+    def eval_true_func(self, x: np.ndarray) -> np.ndarray:
         """Wrapper for real emulating function.  You want this so that
         you can do some pre-processing, training, or saving each time
         the emulator gets called."""
 
-        myY = self.true_func(x)
+        myY: np.ndarray = self.true_func(x)
 
         # Add x, val to a batch list that we will hold around
         self.batchTrainX.append(x)
@@ -113,7 +118,7 @@ class Learner(object):
         self.set_emul_func(xtrain, ytrain)
 
         # Set the emulator function by calling to the subclass's particular method
-        CV_y_err = CV_y - np.array([self.emul_func(x) for x in CV_x])
+        CV_y_err = CV_y - np.array([self.emul_func(x) for x in CV_x])[0]
         assert CV_y.shape == CV_y_err.shape  # Bizarre bugs if this isn't true
         self.set_emul_error_func(CV_x, CV_y_err)
 
@@ -130,7 +135,7 @@ class Learner(object):
 
         # import sys; sys.exit()
 
-    def split_CV(self, xdata, ydata, frac_cv):
+    def split_CV(self, xdata: np.ndarray, ydata: np.ndarray, frac_cv: float):
         """Splits a dataset into a cross-validation and training set.  Shuffles the data.
 
         Parameters
@@ -180,7 +185,7 @@ class Learner(object):
 
         return xtrain, ytrain, x_cv, y_cv
 
-    def __call__(self, x):
+    def __call__(self, x: np.ndarray):
 
         # Check if list size has increased above some threshold
         # If so, retrain.  Else, skip it

@@ -8,7 +8,7 @@ from learn_as_you_go import InterpolationEmulator  # NOQA
 DEFAULT_ABS_ERR = 0.05
 DEFAULT_REL_ERR = 1.0
 
-CONSTANT = 1.0
+CONSTANT = np.array([1.0])
 
 
 def true_function_constant(x):
@@ -16,11 +16,11 @@ def true_function_constant(x):
 
 
 def true_function_dot(x):
-    return np.dot(x, x)
+    return np.array([np.dot(x, x)])
 
 
 def true_function_sin(x):
-    return np.sin(10 * x[0])
+    return np.array([np.sin(10 * x[0])])
 
 
 @pytest.mark.parametrize(

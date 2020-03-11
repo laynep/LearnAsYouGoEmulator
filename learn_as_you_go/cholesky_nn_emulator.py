@@ -117,6 +117,9 @@ class CholeskyNnEmulator(Learner):
                 dist_list.append(np.mean(dist))
 
             dist_list = np.array(dist_list)
+            scalar_error = np.mean(
+                np.abs(ytrain), axis=0
+            )  # TODO: is this a good error measure?
 
             def error_model(dist, a, b, c):
                 return a * (dist) + b * (dist) ** c
@@ -124,7 +127,7 @@ class CholeskyNnEmulator(Learner):
             bestfit, cov = opt.curve_fit(
                 error_model,
                 dist_list,
-                np.abs(ytrain),
+                scalar_error,
                 # bounds=((0.0,0.0,0.0),(np.inf,np.inf,np.inf)))
                 bounds=((0.0, 0.0, 0.0), (1e1, 1e1, 1e1)),
             )
