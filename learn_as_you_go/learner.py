@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 
-from typing import Callable, List
+from typing import Callable, List, Tuple, Union
 
 import numpy as np  # type: ignore
 
@@ -191,7 +191,7 @@ class Learner(object):
 
         return xtrain, ytrain, x_cv, y_cv
 
-    def __call__(self, x: np.ndarray):
+    def __call__(self, x: np.ndarray) -> Union[np.ndarray, Tuple[np.ndarray, float]]:
 
         # Check if list size has increased above some threshold
         # If so, train for first time
@@ -220,43 +220,33 @@ class Learner(object):
             self.batchTrainX = []
             self.batchTrainY = []
 
+        # Calculate a value and error to return
+        val: np.ndarray
+        err: float
+
         if self.trained:
             val, err = self.emul_func(x), self.emul_error(x)
+
+            # Value and error should not be inf, nan, etc
+            goodval: bool = check_good(val)
+            gooderr: bool = check_good(err)
+
+            # These error checks are ok even if gooderr is False; that case is caught later
+            small_abs_err: bool = np.all(np.abs(err) < self.abs_err_local)
+            small_frac_err: bool = np.all(np.abs(err / val) < self.frac_err_local)
+
+            if goodval and gooderr and small_abs_err and small_frac_err:
+                # print("Emulated -------", val, err#, self.true_func(x))
+                self.nemul += 1
+            else:
+                #    print("Exact evaluation -----------",goodval,gooderr)
+                val = self.eval_true_func(x)
+                err = 0.0
+                self.nexact += 1
+
         else:
             val, err = self.eval_true_func(x), 0.0
-
-        goodval = check_good(val)
-        gooderr = check_good(err)
-
-        # Absolute error has to be under threshold, then checks fractional error vs threshold
-        if gooderr:
-            try:
-                gooderr = all(np.abs(err) < self.abs_err_local)
-            except:  # noqa: E722
-                # Looks safe to assume for now that no unwanted exceptions would be caught
-                # TODO: specify exception type and re-enable lint
-                gooderr = np.abs(err) < self.abs_err_local
-        if gooderr:
-            try:
-                gooderr = all(np.abs(err / val) < self.frac_err_local)
-            except:  # noqa: E722
-                # Looks safe to assume for now that no unwanted exceptions would be caught
-                # TODO: specify exception type and re-enable lint
-                gooderr = np.abs(err / val) < self.frac_err_local
-
-        # DEBUG
-        if not goodval or not gooderr:
-            # if self.trained:
-            #    print("Exact evaluation -----------",goodval,gooderr)
-            val = self.eval_true_func(x)
-            err = 0.0
             self.nexact += 1
-        else:
-            if self.trained:
-                self.nemul += 1
-                # print("Emulated -------", val, err#, self.true_func(x))
-            else:
-                self.nexact += 1
 
         if self.output_err:
             return float(val), float(err)
