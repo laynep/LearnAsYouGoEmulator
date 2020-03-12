@@ -2,55 +2,57 @@ import numpy as np  # type: ignore
 import pytest  # type: ignore
 
 # TODO: remove NOQA when isort is fixed
-from learn_as_you_go import CholeskyNnEmulator as Emulator  # NOQA
+from learn_as_you_go import CholeskyNnEmulator  # NOQA
 
 
-@pytest.mark.xfail
-def test_default_initial_training_threshold():
+XDIM = 1
+CONSTANT = 1.0
+Emulator = CholeskyNnEmulator
+
+
+def constant(x):
+    return np.array([CONSTANT])
+
+
+emulator_default_threshold = Emulator(constant)
+
+emulator_custom_threshold = Emulator(constant)
+emulator_custom_threshold.overrideDefaults(100, 1000)
+
+
+def test_can_set_initial_threshold():
     """
-    Test that the default initial training threshold of 1000 is used
-
-    The emulator should remain in an untrained state for the first 1000 calls,
-    then train for the first time.
+    Test that the initial training threshold can be set
     """
 
-    xdim = 2
-    CONSTANT = 1.0
-    training_threshold = 1000
+    default_threshold = emulator_default_threshold.initTrainThresh
+    custom_threshold = emulator_custom_threshold.initTrainThresh
 
-    @Emulator
-    def constant(x):
-        return CONSTANT
-
-    for x in [np.random.uniform(size=xdim) for _ in range(training_threshold)]:
-        assert not constant.trained
-        constant(x)
-
-    assert constant.trained
+    assert not default_threshold == custom_threshold
 
 
-@pytest.mark.xfail
-def test_custom_initial_training_threshold():
+@pytest.mark.parametrize(
+    "emulator", [emulator_default_threshold, emulator_custom_threshold]
+)
+def test_initial_training_threshold(emulator):
     """
-    Test that the initial training threshold can be chosen
+    Test that the initial training threshold is respected
 
     The emulator should remain in an untrained state for the first N calls,
     then train for the first time.
     """
 
-    xdim = 2
-    CONSTANT = 1.0
-    training_threshold = 1000
-    retraining_threshold = 1000
+    training_threshold = emulator.initTrainThresh
 
-    @Emulator
-    def constant(x):
-        return CONSTANT
+    # The emulator should be untrained until the threshold is reached
+    for i, x in enumerate(
+        [np.random.uniform(size=XDIM) for _ in range(training_threshold + 2)]
+    ):
+        assert not emulator.trained
+        assert emulator.nexact == i
+        emulator(x)
 
-    constant.overrideDefaults(training_threshold, retraining_threshold)
-
-    for x in [np.random.uniform(size=xdim) for _ in range(training_threshold)]:
-        assert not constant.trained
-        constant(x)
-
-    assert constant.trained
+    # The emulator should now be trained with one emulated sim done
+    assert emulator.trained
+    assert emulator.nemul == 1
+    assert emulator.nexact == training_threshold + 1

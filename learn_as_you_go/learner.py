@@ -30,8 +30,10 @@ class Learner(object):
             np.ndarray, float
         ] = lambda _: 0.0  # The initial function is exact
 
-        self.frac_err_local = 0.0
-        self.abs_err_local = 0.0
+        # TODO: Allow user to set error tolerances
+        self.frac_err_local: float = 1.0
+        self.abs_err_local: float = 0.05
+
         self.output_err = False
 
         self.trained = False
@@ -61,6 +63,7 @@ class Learner(object):
         myY: np.ndarray = self.true_func(x)
 
         # Add x, val to a batch list that we will hold around
+        # TODO: lists should have no duplicates
         self.batchTrainX.append(x)
         self.batchTrainY.append(myY)
 
@@ -240,13 +243,15 @@ class Learner(object):
         if not goodval or not gooderr:
             # if self.trained:
             #    print("Exact evaluation -----------",goodval,gooderr)
-            self.nexact += 1
             val = self.eval_true_func(x)
             err = 0.0
+            self.nexact += 1
         else:
             if self.trained:
                 self.nemul += 1
                 # print("Emulated -------", val, err#, self.true_func(x))
+            else:
+                self.nexact += 1
 
         if self.output_err:
             return float(val), float(err)

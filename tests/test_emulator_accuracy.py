@@ -39,7 +39,10 @@ def test_cholesky(true_function, xdim):
         return true_function(x)
 
     np.random.seed(0)
-    for x in [np.random.uniform(size=xdim) for _ in range(1000)]:
+    for x in [
+        np.random.uniform(size=xdim)
+        for _ in range(emulated_function.initTrainThresh + 2)
+    ]:
         emulated_function(x)
 
     assert emulated_function.trained
@@ -74,7 +77,10 @@ def test_constant_interpolation(true_function, xdim):
         return true_function(x)
 
     np.random.seed(0)
-    for x in [np.random.uniform(size=xdim) for _ in range(1000)]:
+    for x in [
+        np.random.uniform(size=xdim)
+        for _ in range(emulated_function.initTrainThresh + 2)
+    ]:
         emulated_function(x)
 
     assert emulated_function.trained
