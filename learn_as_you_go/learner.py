@@ -194,25 +194,27 @@ class Learner(object):
     def __call__(self, x: np.ndarray):
 
         # Check if list size has increased above some threshold
-        # If so, retrain.  Else, skip it
-        if (not self.trained and len(self.batchTrainX) > self.initTrainThresh) or (
-            self.trained and len(self.batchTrainX) > self.otherTrainThresh
-        ):
+        # If so, train for first time
+        if not self.trained and len(self.batchTrainX) > self.initTrainThresh:
 
-            if self.trained:
+            self.train(np.array(self.batchTrainX), np.array(self.batchTrainY))
 
-                self.emul_func.xtrain = np.append(
-                    self.emul_func.xtrain, self.batchTrainX, axis=0
-                )
-                self.emul_func.ytrain = np.append(
-                    self.emul_func.ytrain, self.batchTrainY, axis=0
-                )
+            # Empty the batch
+            self.batchTrainX = []
+            self.batchTrainY = []
 
-                self.train(self.emul_func.xtrain, self.emul_func.ytrain)
+        # Check if list size has increased above retraining threshold
+        # If so, train again
+        elif self.trained and len(self.batchTrainX) > self.otherTrainThresh:
 
-            else:
+            self.emul_func.xtrain = np.append(
+                self.emul_func.xtrain, self.batchTrainX, axis=0
+            )
+            self.emul_func.ytrain = np.append(
+                self.emul_func.ytrain, self.batchTrainY, axis=0
+            )
 
-                self.train(np.array(self.batchTrainX), np.array(self.batchTrainY))
+            self.train(self.emul_func.xtrain, self.emul_func.ytrain)
 
             # Empty the batch
             self.batchTrainX = []
