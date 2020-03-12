@@ -36,7 +36,8 @@ class Learner(object):
 
         self.output_err = False
 
-        self.trained = False
+        self.trained: bool = False
+        self.num_times_trained: int = 0
 
         self.batchTrainX: List[np.ndarray] = []
         self.batchTrainY: List[np.ndarray] = []
@@ -124,6 +125,8 @@ class Learner(object):
         CV_y_err = CV_y - np.array([self.emul_func(x) for x in CV_x])[0]
         assert CV_y.shape == CV_y_err.shape  # Bizarre bugs if this isn't true
         self.set_emul_error_func(CV_x, CV_y_err)
+
+        self.num_times_trained += 1
 
         # self.emul_error2 = self.cholesky_NN(CV_x, CV_y_err)
 
