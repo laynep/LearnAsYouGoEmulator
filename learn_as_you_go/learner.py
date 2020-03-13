@@ -192,6 +192,26 @@ class Learner(object):
         return xtrain, ytrain, x_cv, y_cv
 
     def __call__(self, x: np.ndarray) -> Union[np.ndarray, Tuple[np.ndarray, float]]:
+        """
+        The method that is executed when the wrapped function is called
+
+        Parameters
+        ----------
+        x : ndarray
+            Independent variable.
+            Assumed to be a set of vectors in :math:`R^n`.
+
+            This is either passed directly to the true function or to an emulator.
+
+        Results
+        -------
+        val : float
+            The exact or emulated value of the true function.
+
+        (val, err) : (np.adarray, float)
+            The exact or emulated value of the true function and an error estimate.
+            This version is returned is `return_err` is set to true on the class.
+        """
 
         # Check if list size has increased above some threshold
         # If so, train for first time
