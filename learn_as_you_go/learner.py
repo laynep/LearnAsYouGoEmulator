@@ -9,20 +9,40 @@ import numpy as np  # type: ignore
 from .util import check_good
 
 
-# Emulator
 class Learner(object):
     """
     A class that contains logic for learning as you go
 
-    It does not do any emulation but should be used to define a subclass
-    containing emulation logic.
+    This class is intended to be used as a decorator on non-trivial functions.
+    The function should take one numpy array as an argument and return one
+    numpy array.
+
+    This class does not contain any emulation but should be used to define a
+    subclass containing emulation logic.
     The subclass must contain two methods, `set_emul_func` and
     `set_emul_error_func`, that set the respective functions.
 
-    TODO: Example for docs
+    Examples
+    --------
+
+    TODO: More thorough example
+
+    >>> @Learner
+    >>> def expensive_calculation(x: np.ndarray) -> np.ndarray:
+    >>>     # Function definition
+    >>>     return np.ones_like(x)
+
     """
 
     def __init__(self, true_func):
+        """
+        Constructor for Learner class
+
+        Parameters
+        ----------
+        true_func : Callable
+            Function to be emulated
+        """
 
         self.true_func: Callable[np.ndarray, np.ndarray] = true_func
         self.emul_func = self.true_func
@@ -45,21 +65,40 @@ class Learner(object):
         self.initTrainThresh = 1000
         self.otherTrainThresh = 5000
 
-        # DEBUG
         self.nexact = 0
         self.nemul = 0
 
     def overrideDefaults(self, initTrainThresh, otherTrainThresh):
-        """Override some of the defaults that are otherwise set
-        in the constructor."""
+        """
+        Override some of the defaults that are otherwise set in the constructor
+
+        Parameters
+        ----------
+        initTrainThresh : int
+            Number of data points to accumulate before first training the
+            emulator
+
+        otherTrainThresh : int
+            Number of new data points to accumulate retraining the emulator
+        """
 
         self.initTrainThresh = initTrainThresh
         self.otherTrainThresh = otherTrainThresh
 
     def eval_true_func(self, x: np.ndarray) -> np.ndarray:
-        """Wrapper for real emulating function.  You want this so that
-        you can do some pre-processing, training, or saving each time
-        the emulator gets called."""
+        """
+        Wrapper for evaluating true function
+
+        You want this so that you can do some pre-processing, training, or
+        saving each time the emulator gets called.
+
+        Parameters
+        ----------
+
+        x : np.ndarray
+            Independent variable.
+            Assumed to be a set of vectors in :math:`R^n`.
+        """
 
         myY: np.ndarray = self.true_func(x)
 
@@ -113,7 +152,6 @@ class Learner(object):
 
         # Separate into training and cross-validation sets with 50-50 split so that
         # the prediction and the error are estimated off the same amount of data
-
         frac_cv = 0.5
         xtrain, ytrain, CV_x, CV_y = self.split_CV(xtrain, ytrain, frac_cv)
 
@@ -127,19 +165,6 @@ class Learner(object):
         self.set_emul_error_func(CV_x, CV_y_err)
 
         self.num_times_trained += 1
-
-        # self.emul_error2 = self.cholesky_NN(CV_x, CV_y_err)
-
-        # xtest =[2.0* np.array(np.random.randn(2)) for _ in range(10)]
-        # for x in xtest:
-        #    print("--------------")
-        #    print("x", x)
-        #    print("prediction:", self.emul_func(x))
-        #    print("error param:", self.emul_error(x))
-        #    print("error nonparam:", self.emul_error2(x))
-        #    print("real val, real err:", self.true_func(x), self.true_func(x) - self.emul_func(x))
-
-        # import sys; sys.exit()
 
     def split_CV(self, xdata: np.ndarray, ydata: np.ndarray, frac_cv: float):
         """Splits a dataset into a cross-validation and training set.  Shuffles the data.
@@ -170,12 +195,8 @@ class Learner(object):
             Dependent variable of cross-validation set.  Assumed to be a set of vectors in R^m.
         """
 
-        # Separate into training and cross-validation sets with 80-20 split
+        # Separate into training and cross-validation sets
         num_cv = int(frac_cv * xdata.shape[0])
-
-        # Pre-process data
-        # mean_vals = np.array([np.mean(col) for col in xdata.T])
-        # rms_vals = np.array([np.sqrt(np.mean(col**2)) for col in xdata.T])
 
         rand_subset = np.arange(xdata.shape[0])
         np.random.shuffle(rand_subset)
