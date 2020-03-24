@@ -3,6 +3,7 @@ LearnAsYouGoEmulator
 
 .. image:: https://github.com/musoke/LearnAsYouGoEmulator/workflows/pytest/badge.svg
 
+.. image:: https://github.com/musoke/LearnAsYouGoEmulator/workflows/doc/badge.svg
 
 .. image:: https://github.com/musoke/LearnAsYouGoEmulator/workflows/lints/badge.svg
 

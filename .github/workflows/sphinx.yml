@@ -1,0 +1,30 @@
+name: "doc"
+on:
+- pull_request
+- push
+
+jobs:
+  docs:
+    strategy:
+      matrix:
+        python-version: [3.7]
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+    - name: Run sphinx
+      run: |
+        cd doc
+        make html
+    - uses: actions/upload-artifact@v1
+      with:
+        name: DocumentationHTML
+        path: doc/build/html/
