@@ -8,7 +8,7 @@ Run following command in prompt/terminal:
 """
 import setuptools  # type: ignore
 
-with open("README.md", "r") as fh:
+with open("README.rst", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
@@ -25,8 +25,11 @@ setuptools.setup(
     install_requires=[
         "matplotlib",
         "numpy",
+        "numpydoc",
         "torch",
         "scipy",
+        "sphinx",
+        "sphinx_rtd_theme",
         "emcee>=2,<3",
     ],  # dependencies
     classifiers=[

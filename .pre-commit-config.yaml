@@ -29,3 +29,4 @@ repos:
     hooks:
     -   id: mypy
         args: ["--scripts-are-modules"]  # by default there is also "--ignore-missing-imports"
+        exclude: "doc"
