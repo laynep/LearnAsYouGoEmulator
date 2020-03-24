@@ -6,14 +6,12 @@
 .. include:: ../../README.rst
 
 
-
 .. toctree::
     :maxdepth: 2
     :caption: Contents:
 
     examples
-
-.. automodule:: learn_as_you_go
+    api
 
 
 Indices and tables
