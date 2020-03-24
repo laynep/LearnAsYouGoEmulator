@@ -8,9 +8,12 @@
 
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 2
+    :caption: Contents:
 
+    examples
+
+.. automodule:: learn_as_you_go
 
 
 Indices and tables
