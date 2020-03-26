@@ -1,8 +1,10 @@
-from .cholesky_nn_emulator import CholeskyNnEmulator
-from .emulator import BaseEmulator
-from .interpolation_emulator import InterpolationEmulator
+from .emulator import (
+    BaseEmulator,
+    CholeskyNnEmulator,
+    InterpolationEmulator,
+    TorchEmulator,
+)
 from .learner import Learner, emulate
-from .torch_emulator import TorchEmulator
 
 __all__ = [
     "Learner",
