@@ -54,7 +54,7 @@ class Learner(object):
         self.frac_err_local: float = 1.0
         self.abs_err_local: float = 0.05
 
-        self.output_err = False
+        self.output_err: bool = False
 
         self.trained: bool = False
         self.num_times_trained: int = 0
@@ -62,11 +62,11 @@ class Learner(object):
         self.batchTrainX: List[np.ndarray] = []
         self.batchTrainY: List[np.ndarray] = []
 
-        self.initTrainThresh = 1000
-        self.otherTrainThresh = 5000
+        self.initTrainThresh: int = 1000
+        self.otherTrainThresh: int = 5000
 
-        self.nexact = 0
-        self.nemul = 0
+        self.nexact: int = 0
+        self.nemul: int = 0
 
     def overrideDefaults(self, initTrainThresh, otherTrainThresh):
         """
