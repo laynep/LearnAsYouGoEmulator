@@ -7,18 +7,14 @@ import scipy.optimize as opt  # type: ignore
 from scipy.spatial import cKDTree as KDTree  # type: ignore
 
 from .emulator import BaseEmulator
-from .learner import Learner
 from .util import check_good
 
 
-class CholeskyNnEmulator(Learner, BaseEmulator):
+class CholeskyNnEmulator(BaseEmulator):
     """
     An emulator based on Cholesky decomposition and nearest neighbours
 
     This emulator described in detail in arXiv:1506.01079.
-
-    The learn-as-you-go aspects of its behaviour are inherited from the
-    `learn_as_you_go.emulator.emulator` class.
     """
 
     class cholesky_NN(object):

@@ -7,6 +7,7 @@ import numpy as np  # type: ignore
 
 # TODO: remove NOQA when isort is fixed
 from learn_as_you_go import CholeskyNnEmulator as Emulator  # NOQA
+from learn_as_you_go import emulate  # NOQA
 
 
 def main():
@@ -16,7 +17,7 @@ def main():
     ######################
     ######################
     # Toy likelihood
-    @Emulator
+    @emulate(Emulator)
     def loglike(x):
         if x.ndim != 1:
             loglist = []
@@ -86,7 +87,7 @@ def main():
 
     y_true = np.array([loglike.true_func(x) for x in x_data_plot])
     y_emul = np.array([loglike(x) for x in x_data_plot])
-    y_emul_raw = np.array([loglike.emul_func(x) for x in x_data_plot])
+    y_emul_raw = np.array([loglike.emulator.emul_func(x) for x in x_data_plot])
 
     ax.plot(x_data_plot[..., 0], y_true, label="true", color="black")
     ax.scatter(x_data_plot[..., 0], y_emul, label="emulated", marker="+")

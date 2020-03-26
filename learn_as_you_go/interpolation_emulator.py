@@ -6,10 +6,9 @@ import numpy as np  # type: ignore
 import scipy.interpolate as interp  # type: ignore
 
 from .emulator import BaseEmulator
-from .learner import Learner
 
 
-class InterpolationEmulator(Learner, BaseEmulator):
+class InterpolationEmulator(BaseEmulator):
     """
     An emulator based on interpolation
 
@@ -19,9 +18,6 @@ class InterpolationEmulator(Learner, BaseEmulator):
     It returns infinity for values outside the trained domain.
     TODO: determine whether an exception should be raised instead. Then the
     emulator should evaluate the true function.
-
-    The learn-as-you-go aspects of its behaviour are inherited from the
-    `learn_as_you_go.emulator.emulator` class.
     """
 
     def interpolator(self, xdata: np.ndarray, ydata: np.ndarray):

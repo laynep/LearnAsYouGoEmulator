@@ -6,35 +6,51 @@ from typing import Callable, List, Tuple, Union
 
 import numpy as np  # type: ignore
 
+from .emulator import BaseEmulator
 from .util import check_good
 
 
-class Learner(object):
+def emulate(emulator_class: BaseEmulator) -> Callable:
     """
-    A class that contains logic for learning as you go
+    Emulate a function with the given emulator class
 
-    This class is intended to be used as a decorator on non-trivial functions.
+    This function is intended to be used as a decorator on non-trivial
+    functions.
     The function should take one numpy array as an argument and return one
     numpy array.
-
-    This class does not contain any emulation but should be used to define a
-    subclass containing emulation logic.
-    The subclass must contain two methods, `set_emul_func` and
-    `set_emul_error_func`, that set the respective functions.
 
     Examples
     --------
 
     TODO: More thorough example
 
-    >>> @Learner
+    >>> from learn_as_you_go import emulate, CholeskyNnEmulator
+    >>> @emulate(CholeskyNnEmulator)
     >>> def expensive_calculation(x: np.ndarray) -> np.ndarray:
     >>>     # Function definition
     >>>     return np.ones_like(x)
 
     """
 
-    def __init__(self, true_func):
+    def inner(true_func: Callable) -> Learner:
+
+        return Learner(true_func, emulator_class)
+
+    return inner
+
+
+class Learner(object):
+    """
+    A class that contains logic for learning as you go
+
+    This class does not contain any emulation but should be constructed with an
+    emulator containing emulation logic.
+    The emulator must be a subclass of BaseEmulator, implementing two methods,
+    `set_emul_func` and `set_emul_error_func`, that set the respective
+    functions.
+    """
+
+    def __init__(self, true_func: Callable[[np.ndarray], np.ndarray], emulator_class):
         """
         Constructor for Learner class
 
@@ -42,13 +58,17 @@ class Learner(object):
         ----------
         true_func : Callable
             Function to be emulated
+
+        emulator_class : BaseEmulator
+            The emulator class to be used
         """
 
-        self.true_func: Callable[np.ndarray, np.ndarray] = true_func
-        self.emul_func = self.true_func
-        self.emul_error: Callable[
-            np.ndarray, float
-        ] = lambda _: 0.0  # The initial function is exact
+        self.emulator_class = emulator_class
+        assert issubclass(self.emulator_class, BaseEmulator)
+
+        self.emulator = self.emulator_class()
+
+        self.true_func: Callable[[np.ndarray], np.ndarray] = true_func
 
         # TODO: Allow user to set error tolerances
         self.frac_err_local: float = 1.0
@@ -157,12 +177,12 @@ class Learner(object):
 
         # Set the emulator function by calling to the subclass's particular method
         # TODO: fail gracefully if this is not defined.
-        self.set_emul_func(xtrain, ytrain)
+        self.emulator.set_emul_func(xtrain, ytrain)
 
         # Set the emulator function by calling to the subclass's particular method
-        CV_y_err = CV_y - np.array([self.emul_func(x) for x in CV_x])[0]
+        CV_y_err = CV_y - np.array([self.emulator.emul_func(x) for x in CV_x])[0]
         assert CV_y.shape == CV_y_err.shape  # Bizarre bugs if this isn't true
-        self.set_emul_error_func(CV_x, CV_y_err)
+        self.emulator.set_emul_error_func(CV_x, CV_y_err)
 
         self.num_times_trained += 1
 
@@ -248,14 +268,14 @@ class Learner(object):
         # If so, train again
         elif self.trained and len(self.batchTrainX) > self.otherTrainThresh:
 
-            self.emul_func.xtrain = np.append(
-                self.emul_func.xtrain, self.batchTrainX, axis=0
+            self.emulator.emul_func.xtrain = np.append(
+                self.emulator.emul_func.xtrain, self.batchTrainX, axis=0
             )
-            self.emul_func.ytrain = np.append(
-                self.emul_func.ytrain, self.batchTrainY, axis=0
+            self.emulator.emul_func.ytrain = np.append(
+                self.emulator.emul_func.ytrain, self.batchTrainY, axis=0
             )
 
-            self.train(self.emul_func.xtrain, self.emul_func.ytrain)
+            self.train(self.emulator.emul_func.xtrain, self.emulator.emul_func.ytrain)
 
             # Empty the batch
             self.batchTrainX = []
@@ -266,7 +286,7 @@ class Learner(object):
         err: float
 
         if self.trained:
-            val, err = self.emul_func(x), self.emul_error(x)
+            val, err = self.emulator.emul_func(x), self.emulator.emul_error(x)
 
             # Value and error should not be inf, nan, etc
             goodval: bool = check_good(val)

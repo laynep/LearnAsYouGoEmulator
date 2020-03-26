@@ -6,6 +6,7 @@ import numpy as np  # type: ignore
 
 # TODO: remove NOQA when isort is fixed
 from learn_as_you_go import CholeskyNnEmulator as Emulator  # NOQA
+from learn_as_you_go import emulate  # NOQA
 
 
 def main():
@@ -19,7 +20,7 @@ def main():
     ######################
     ######################
     # Toy likelihood
-    @Emulator
+    @emulate(Emulator)
     def loglike(x):
         if x.ndim != 1:
             loglist = []

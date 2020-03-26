@@ -3,6 +3,7 @@ import pytest  # type: ignore
 
 # TODO: remove NOQA when isort is fixed
 from learn_as_you_go import CholeskyNnEmulator  # NOQA
+from learn_as_you_go import Learner  # NOQA
 
 XDIM = 1
 CONSTANT = 1.0
@@ -13,9 +14,9 @@ def constant(x):
     return np.array([CONSTANT])
 
 
-emulator_default_threshold = Emulator(constant)
+emulator_default_threshold = Learner(constant, CholeskyNnEmulator)
 
-emulator_custom_threshold = Emulator(constant)
+emulator_custom_threshold = Learner(constant, CholeskyNnEmulator)
 emulator_custom_threshold.overrideDefaults(100, 1000)
 
 
@@ -63,7 +64,7 @@ def test_retraining_threshold():
     Test that retraining happens at right threshold
     """
 
-    emulator = Emulator(constant)
+    emulator = Learner(constant, Emulator)
     training_threshold = emulator.initTrainThresh
 
     # The emulator should be untrained until the threshold is reached

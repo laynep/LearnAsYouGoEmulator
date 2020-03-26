@@ -10,6 +10,7 @@ import functions  # NOQA
 from learn_as_you_go import CholeskyNnEmulator  # NOQA
 from learn_as_you_go import InterpolationEmulator  # NOQA
 from learn_as_you_go import TorchEmulator  # NOQA
+from learn_as_you_go import emulate  # NOQA
 
 DEFAULT_ABS_ERR = 0.05
 DEFAULT_REL_ERR = 1.0
@@ -41,7 +42,7 @@ def test_accuracy(emulator, true_function, xdim):
     TODO: test that the emulated function is called, not the true function.
     """
 
-    @emulator
+    @emulate(emulator)
     def emulated_function(x):
         return true_function(x)
 
@@ -118,7 +119,7 @@ def test_constant_interpolation(true_function, xdim):
     TODO: test that the emulatted function is called, not the true function.
     """
 
-    @InterpolationEmulator
+    @emulate(InterpolationEmulator)
     def emulated_function(x):
         return true_function(x)
 

@@ -5,11 +5,10 @@ An emulator that uses a simple neural network
 import numpy as np  # type: ignore
 
 from .emulator import BaseEmulator
-from .learner import Learner
 from .nn import Net
 
 
-class TorchEmulator(Learner, BaseEmulator):
+class TorchEmulator(BaseEmulator):
     """
     Class that uses pytorch to do emulation
 

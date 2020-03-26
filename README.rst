@@ -15,7 +15,7 @@ The package defines decorators that can be applied to functions to learn their o
 
 The basic usage of the emulator code is something like this::
 
-    @CholeskyNnEmulator
+    @emulate(CholeskyNnEmulator)
     def loglike(x):
         if x.ndim!=1:
             loglist = []
