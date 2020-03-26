@@ -1,5 +1,3 @@
-#!/bin/python
-
 from __future__ import print_function
 
 from typing import Callable, List, Tuple, Union
@@ -48,6 +46,41 @@ class Learner(object):
     The emulator must be a subclass of BaseEmulator, implementing two methods,
     `set_emul_func` and `set_emul_error_func`, that set the respective
     functions.
+
+    Attributes
+    ----------
+
+    emulator_class : BaseEmulator
+        The type of emulator used.
+
+    emulator : BaseEmulator
+        An instance of the class `emulator_class`.
+        This is where the heavy lifting goes on.
+
+    true_func : Callable
+        The function which is emulated
+
+    frac_err_local : float
+        The fractional error tolerance.
+        If the fractional error from the emulator is higher than this, the true
+        function is called.
+
+    abs_err_local : float
+        The absolute error tolerance.
+        If the absolute error from the emulator is higher than this, the true
+        function is called.
+
+    output_err : bool
+        Whether to output an error estimate.
+
+    trained : bool
+        Whether the emulator has been trained
+
+    init_train_thresh : int
+        Number of points to accumulate before training the emulator
+
+    other_train_thresh : int
+        Number of addition points to accumulate before retraining the emulator
     """
 
     def __init__(self, true_func: Callable[[np.ndarray], np.ndarray], emulator_class):
@@ -70,40 +103,41 @@ class Learner(object):
 
         self.true_func: Callable[[np.ndarray], np.ndarray] = true_func
 
-        # TODO: Allow user to set error tolerances
         self.frac_err_local: float = 1.0
         self.abs_err_local: float = 0.05
 
         self.output_err: bool = False
 
+        self.batch_train_x: List[np.ndarray] = []
+        self.batch_train_y: List[np.ndarray] = []
+
+        self.init_train_thresh: int = 1000
+        self.other_train_thresh: int = 5000
+
+        # Whether the emulator is trained
         self.trained: bool = False
-        self.num_times_trained: int = 0
+        self._num_times_trained: int = 0
 
-        self.batchTrainX: List[np.ndarray] = []
-        self.batchTrainY: List[np.ndarray] = []
+        # Number of exact or emulated evaluations
+        self._nexact: int = 0
+        self._nemul: int = 0
 
-        self.initTrainThresh: int = 1000
-        self.otherTrainThresh: int = 5000
-
-        self.nexact: int = 0
-        self.nemul: int = 0
-
-    def overrideDefaults(self, initTrainThresh, otherTrainThresh):
+    def overrideDefaults(self, init_train_thresh, other_train_thresh):
         """
         Override some of the defaults that are otherwise set in the constructor
 
         Parameters
         ----------
-        initTrainThresh : int
+        init_train_thresh : int
             Number of data points to accumulate before first training the
             emulator
 
-        otherTrainThresh : int
+        other_train_thresh : int
             Number of new data points to accumulate retraining the emulator
         """
 
-        self.initTrainThresh = initTrainThresh
-        self.otherTrainThresh = otherTrainThresh
+        self.init_train_thresh = init_train_thresh
+        self.other_train_thresh = other_train_thresh
 
     def eval_true_func(self, x: np.ndarray) -> np.ndarray:
         """
@@ -124,8 +158,8 @@ class Learner(object):
 
         # Add x, val to a batch list that we will hold around
         # TODO: lists should have no duplicates
-        self.batchTrainX.append(x)
-        self.batchTrainY.append(myY)
+        self.batch_train_x.append(x)
+        self.batch_train_y.append(myY)
 
         return myY
 
@@ -184,7 +218,7 @@ class Learner(object):
         assert CV_y.shape == CV_y_err.shape  # Bizarre bugs if this isn't true
         self.emulator.set_emul_error_func(CV_x, CV_y_err)
 
-        self.num_times_trained += 1
+        self._num_times_trained += 1
 
     def split_CV(self, xdata: np.ndarray, ydata: np.ndarray, frac_cv: float):
         """Splits a dataset into a cross-validation and training set.  Shuffles the data.
@@ -256,30 +290,30 @@ class Learner(object):
 
         # Check if list size has increased above some threshold
         # If so, train for first time
-        if not self.trained and len(self.batchTrainX) > self.initTrainThresh:
+        if not self.trained and len(self.batch_train_x) > self.init_train_thresh:
 
-            self.train(np.array(self.batchTrainX), np.array(self.batchTrainY))
+            self.train(np.array(self.batch_train_x), np.array(self.batch_train_y))
 
             # Empty the batch
-            self.batchTrainX = []
-            self.batchTrainY = []
+            self.batch_train_x = []
+            self.batch_train_y = []
 
         # Check if list size has increased above retraining threshold
         # If so, train again
-        elif self.trained and len(self.batchTrainX) > self.otherTrainThresh:
+        elif self.trained and len(self.batch_train_x) > self.other_train_thresh:
 
             self.emulator.emul_func.xtrain = np.append(
-                self.emulator.emul_func.xtrain, self.batchTrainX, axis=0
+                self.emulator.emul_func.xtrain, self.batch_train_x, axis=0
             )
             self.emulator.emul_func.ytrain = np.append(
-                self.emulator.emul_func.ytrain, self.batchTrainY, axis=0
+                self.emulator.emul_func.ytrain, self.batch_train_y, axis=0
             )
 
             self.train(self.emulator.emul_func.xtrain, self.emulator.emul_func.ytrain)
 
             # Empty the batch
-            self.batchTrainX = []
-            self.batchTrainY = []
+            self.batch_train_x = []
+            self.batch_train_y = []
 
         # Calculate a value and error to return
         val: np.ndarray
@@ -298,16 +332,16 @@ class Learner(object):
 
             if goodval and gooderr and small_abs_err and small_frac_err:
                 # print("Emulated -------", val, err#, self.true_func(x))
-                self.nemul += 1
+                self._nemul += 1
             else:
                 #    print("Exact evaluation -----------",goodval,gooderr)
                 val = self.eval_true_func(x)
                 err = 0.0
-                self.nexact += 1
+                self._nexact += 1
 
         else:
             val, err = self.eval_true_func(x), 0.0
-            self.nexact += 1
+            self._nexact += 1
 
         if self.output_err:
             return float(val), float(err)

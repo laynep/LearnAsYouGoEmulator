@@ -52,7 +52,7 @@ def test_accuracy(emulator, true_function, xdim):
 
     for x in [
         np.random.uniform(size=xdim)
-        for _ in range(emulated_function.initTrainThresh + 2)
+        for _ in range(emulated_function.init_train_thresh + 2)
     ]:
         emulated_function(x)
 
@@ -126,7 +126,7 @@ def test_constant_interpolation(true_function, xdim):
     np.random.seed(0)
     for x in [
         np.random.uniform(size=xdim)
-        for _ in range(emulated_function.initTrainThresh + 2)
+        for _ in range(emulated_function.init_train_thresh + 2)
     ]:
         emulated_function(x)
 

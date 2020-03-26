@@ -68,8 +68,8 @@ def main():
                 fname.write("%s " % str(k))
             fname.write("\n")
 
-    print("n exact evals:", loglike.nexact)
-    print("n emul evals:", loglike.nemul)
+    print("n exact evals:", loglike._nexact)
+    print("n emul evals:", loglike._nemul)
 
 
 def test_main():
