@@ -61,17 +61,22 @@ class Learner(object):
         The function which is emulated
 
     frac_err_local : float
-        The fractional error tolerance.
-        If the fractional error from the emulator is higher than this, the true
-        function is called.
+        Maximum fractional error in emulated function.  Calls to emulation function
+        that exceed this error level are evaluated exactly instead.
+        Default: 1.0
 
     abs_err_local : float
-        The absolute error tolerance.
-        If the absolute error from the emulator is higher than this, the true
-        function is called.
+        Maximum absolute error allowed in emulated function.  Calls to emulation function
+        that exceed frac_err_local but are lower than abs_err_local are emulated, rather
+        than exactly evaluated.
+        FIXME: this doesn't happen
+        Default: 0.05
 
     output_err : bool
         Whether to output an error estimate.
+        Set to False if you do not want the error to be an output of the emulated function.
+        Set to True if you do.
+        Default: False
 
     trained : bool
         Whether the emulator has been trained
@@ -81,6 +86,11 @@ class Learner(object):
 
     other_train_thresh : int
         Number of addition points to accumulate before retraining the emulator
+
+    frac_cv : float
+        Fraction of training set to use for error modelling
+        The default value of 0.5 means that the prediction and the error are
+        estimated off the same amount of data.
     """
 
     def __init__(self, true_func: Callable[[np.ndarray], np.ndarray], emulator_class):
@@ -113,6 +123,9 @@ class Learner(object):
 
         self.init_train_thresh: int = 1000
         self.other_train_thresh: int = 5000
+
+        # Fraction of training set to use for error modelling
+        self.frac_cv = 0.5
 
         # Whether the emulator is trained
         self.trained: bool = False
@@ -163,61 +176,42 @@ class Learner(object):
 
         return myY
 
-    def train(
-        self, xtrain, ytrain, frac_err_local=1.0, abs_err_local=0.05, output_err=False
-    ):
+    def train(self, x_train: List[np.ndarray], y_train: List[np.ndarray]):
         """Train a ML algorithm to replace true_func: X --> Y.  Estimate error model via cross-validation.
 
         Parameters
         ----------
-        xtrain : ndarray
-            Independent variable of training set.  Assumed to be a set of vectors in R^n
+        x_train : ndarray
+            Independent variable of training set.  Assumed to be a set of
+            vectors in :math:`R^n`
 
-        ytrain : ndarray
-            Dependent variable of training set.  Assumed to be a set of scalars in R^m, although it has
-            limited functionality if m!=1.
-
-        frac_err_local : scalar
-            Maximum fractional error in emulated function.  Calls to emulation function
-            that exceed this error level are evaluated exactly instead.
-
-        abs_err_local : scalar
-            Maximum absolute error allowed in emulated function.  Calls to emulation function
-            that exceed frac_err_local but are lower than abs_err_local are emulated, rather
-            than exactly evaluated.
-
-        output_err : logical
-            Set to False if you do not want the error to be an output of the emulated function.
-            Set to True if you do.
+        y_train : ndarray
+            Dependent variable of training set.  Assumed to be a set of vectors
+            in :math:`R^m`, although it has limited functionality if m!=1.
         """
 
         print("RETRAINING!------------------------")
 
-        self.frac_err_local = frac_err_local
-        self.abs_err_local = abs_err_local
-
-        self.trained = True
-
-        if output_err is not False:
+        # TODO: remove this
+        if self.output_err is not False:
             # raise Exception('Do not currently have capability to output the error to the chain.')
             pass
 
-        self.output_err = output_err
-
         # Separate into training and cross-validation sets with 50-50 split so that
         # the prediction and the error are estimated off the same amount of data
-        frac_cv = 0.5
-        xtrain, ytrain, CV_x, CV_y = self.split_CV(xtrain, ytrain, frac_cv)
+        x_train, y_train, x_cv, y_cv = self.split_CV(x_train, y_train, self.frac_cv)
 
         # Set the emulator function by calling to the subclass's particular method
-        # TODO: fail gracefully if this is not defined.
-        self.emulator.set_emul_func(xtrain, ytrain)
+        self.emulator.set_emul_func(x_train, y_train)
 
         # Set the emulator function by calling to the subclass's particular method
-        CV_y_err = CV_y - np.array([self.emulator.emul_func(x) for x in CV_x])[0]
-        assert CV_y.shape == CV_y_err.shape  # Bizarre bugs if this isn't true
-        self.emulator.set_emul_error_func(CV_x, CV_y_err)
+        CV_y_err = y_cv - np.array([self.emulator.emul_func(x) for x in x_cv])[0]
+        assert y_cv.shape == CV_y_err.shape  # Bizarre bugs if this isn't true
+        self.emulator.set_emul_error_func(x_cv, CV_y_err)
 
+        # TODO Add the CV values back to the training set
+
+        self.trained = True
         self._num_times_trained += 1
 
     def split_CV(self, xdata: np.ndarray, ydata: np.ndarray, frac_cv: float):

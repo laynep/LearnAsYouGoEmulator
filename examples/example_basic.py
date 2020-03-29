@@ -65,9 +65,7 @@ def main():
         )
 
     Ytrain = np.array([loglike(X) for X in Xtrain])
-    loglike.train(
-        Xtrain, Ytrain, frac_err_local=0.05, abs_err_local=1e0, output_err=False
-    )
+    loglike.train(Xtrain, Ytrain)
 
     for x in xlist:
         print("x", x)
