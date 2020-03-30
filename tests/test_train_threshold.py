@@ -46,17 +46,19 @@ def test_initial_training_threshold(emulator):
 
     # The emulator should be untrained until the threshold is reached
     for i, x in enumerate(
-        [np.random.uniform(size=XDIM) for _ in range(training_threshold + 2)]
+        [np.random.uniform(size=XDIM) for _ in range(training_threshold)]
     ):
         assert not emulator.trained
         assert emulator._nexact == i
         emulator(x)
 
+    emulator(np.random.uniform(size=XDIM))
+
     # The emulator should now be trained with one emulated sim done
     assert emulator.trained
     assert emulator._num_times_trained == 1
     assert emulator._nemul == 1
-    assert emulator._nexact == training_threshold + 1
+    assert emulator._nexact == training_threshold
 
 
 def test_retraining_threshold():
@@ -69,17 +71,19 @@ def test_retraining_threshold():
 
     # The emulator should be untrained until the threshold is reached
     for i, x in enumerate(
-        [np.random.uniform(size=XDIM) for _ in range(training_threshold + 2)]
+        [np.random.uniform(size=XDIM) for _ in range(training_threshold)]
     ):
         assert not emulator.trained
         assert emulator._nexact == i
         emulator(x)
 
+    emulator(np.random.uniform(size=XDIM))
+
     # The emulator should now be trained with one emulated sim done
     assert emulator.trained
     assert emulator._num_times_trained == 1
     assert emulator._nemul == 1
-    assert emulator._nexact == training_threshold + 1
+    assert emulator._nexact == training_threshold
 
     # The emulator should retrain when the retraining threshold is reached
     retraining_threshold = emulator.other_train_thresh
@@ -87,12 +91,15 @@ def test_retraining_threshold():
     # Do these evaluations on an interval far from the initial interval, so
     # that they are all from the true function
     for i, x in enumerate(
-        [100 + np.random.uniform(size=XDIM) for _ in range(retraining_threshold + 2)]
+        [100 + np.random.uniform(size=XDIM) for _ in range(retraining_threshold)]
     ):
+        assert emulator._nexact == training_threshold + i
         emulator(x)
+
+    emulator(np.random.uniform(size=XDIM))
 
     # The emulator should now be trained with one emulated sim done
     assert emulator.trained
     assert emulator._num_times_trained == 2
     assert emulator._nemul == 2
-    assert emulator._nexact == training_threshold + retraining_threshold + 2
+    assert emulator._nexact == training_threshold + retraining_threshold

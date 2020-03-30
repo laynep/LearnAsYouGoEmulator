@@ -159,6 +159,8 @@ class Learner(object):
         You want this so that you can do some pre-processing, training, or
         saving each time the emulator gets called.
 
+        Train the emulator if the specified thresholds are met.
+
         Parameters
         ----------
 
@@ -173,6 +175,33 @@ class Learner(object):
         # TODO: lists should have no duplicates
         self.batch_train_x.append(x)
         self.batch_train_y.append(myY)
+
+        # Check if list size has increased above some threshold
+        # If so, train for first time
+        if not self.trained and len(self.batch_train_x) >= self.init_train_thresh:
+
+            self.train(np.array(self.batch_train_x), np.array(self.batch_train_y))
+
+            # Empty the batch
+            self.batch_train_x = []
+            self.batch_train_y = []
+
+        # Check if list size has increased above retraining threshold
+        # If so, train again
+        elif self.trained and len(self.batch_train_x) >= self.other_train_thresh:
+
+            self.emulator.emul_func.xtrain = np.append(
+                self.emulator.emul_func.xtrain, self.batch_train_x, axis=0
+            )
+            self.emulator.emul_func.ytrain = np.append(
+                self.emulator.emul_func.ytrain, self.batch_train_y, axis=0
+            )
+
+            self.train(self.emulator.emul_func.xtrain, self.emulator.emul_func.ytrain)
+
+            # Empty the batch
+            self.batch_train_x = []
+            self.batch_train_y = []
 
         return myY
 
@@ -296,6 +325,10 @@ class Learner(object):
         """
         The method that is executed when the wrapped function is called
 
+        Try to use an emulated version of `true_func`.  If this is not possible
+        because the error estimate is too high or the emulator is not trained,
+        fall back to the true function.
+
         Parameters
         ----------
         x : ndarray
@@ -314,34 +347,6 @@ class Learner(object):
             This version is returned is `return_err` is set to true on the class.
         """
 
-        # Check if list size has increased above some threshold
-        # If so, train for first time
-        if not self.trained and len(self.batch_train_x) > self.init_train_thresh:
-
-            self.train(np.array(self.batch_train_x), np.array(self.batch_train_y))
-
-            # Empty the batch
-            self.batch_train_x = []
-            self.batch_train_y = []
-
-        # Check if list size has increased above retraining threshold
-        # If so, train again
-        elif self.trained and len(self.batch_train_x) > self.other_train_thresh:
-
-            self.emulator.emul_func.xtrain = np.append(
-                self.emulator.emul_func.xtrain, self.batch_train_x, axis=0
-            )
-            self.emulator.emul_func.ytrain = np.append(
-                self.emulator.emul_func.ytrain, self.batch_train_y, axis=0
-            )
-
-            self.train(self.emulator.emul_func.xtrain, self.emulator.emul_func.ytrain)
-
-            # Empty the batch
-            self.batch_train_x = []
-            self.batch_train_y = []
-
-        # Calculate a value and error to return
         val: np.ndarray
         err: float
 
