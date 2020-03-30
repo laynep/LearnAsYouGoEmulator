@@ -260,6 +260,38 @@ class Learner(object):
 
         return xtrain, ytrain, x_cv, y_cv
 
+    def emulation_is_valid(self, val: np.ndarray, err: float) -> bool:
+        """
+        Check if an emulated value is valid and likely accurate
+
+        Check whether the val and error are valid values and whether the
+        estimated error is acceptable.
+
+        Parameters
+        ----------
+
+        val : np.ndarray
+            Proposed value
+
+        err : float
+            Error estimate
+
+        Returns
+        -------
+
+        bool
+        """
+
+        # Value and error should not be inf, nan, etc
+        goodval: bool = check_good(val)
+        gooderr: bool = check_good(err)
+
+        # These error checks are ok even if gooderr is False; that case is caught later
+        small_abs_err: bool = np.all(np.abs(err) < self.abs_err_local)
+        small_frac_err: bool = np.all(np.abs(err / val) < self.frac_err_local)
+
+        return goodval and gooderr and small_abs_err and small_frac_err
+
     def __call__(self, x: np.ndarray) -> Union[np.ndarray, Tuple[np.ndarray, float]]:
         """
         The method that is executed when the wrapped function is called
@@ -314,17 +346,12 @@ class Learner(object):
         err: float
 
         if self.trained:
+            # Note: in the paper, it is assumed that error checking can be
+            # performed before the evaluation of the emulator.  We can't do
+            # this as the error check uses value for the fractional error.
             val, err = self.emulator.emul_func(x), self.emulator.emul_error(x)
 
-            # Value and error should not be inf, nan, etc
-            goodval: bool = check_good(val)
-            gooderr: bool = check_good(err)
-
-            # These error checks are ok even if gooderr is False; that case is caught later
-            small_abs_err: bool = np.all(np.abs(err) < self.abs_err_local)
-            small_frac_err: bool = np.all(np.abs(err / val) < self.frac_err_local)
-
-            if goodval and gooderr and small_abs_err and small_frac_err:
+            if self.emulation_is_valid(val, err):
                 # print("Emulated -------", val, err#, self.true_func(x))
                 self._nemul += 1
             else:
