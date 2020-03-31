@@ -17,7 +17,7 @@ def constant(x):
 emulator_default_threshold = Learner(constant, CholeskyNnEmulator)
 
 emulator_custom_threshold = Learner(constant, CholeskyNnEmulator)
-emulator_custom_threshold.overrideDefaults(100, 1000)
+emulator_custom_threshold.init_train_thresh = 100
 
 
 def test_can_set_initial_threshold():
@@ -86,13 +86,17 @@ def test_retraining_threshold():
     assert emulator._nexact == training_threshold
 
     # The emulator should retrain when the retraining threshold is reached
-    retraining_threshold = emulator.other_train_thresh
+    retraining_threshold = int((1 + emulator.frac_cv) * emulator.init_train_thresh)
 
     # Do these evaluations on an interval far from the initial interval, so
-    # that they are all from the true function
+    # that they are all evaluated from the true function
     for i, x in enumerate(
-        [100 + np.random.uniform(size=XDIM) for _ in range(retraining_threshold)]
+        [
+            100 + np.random.uniform(size=XDIM)
+            for _ in range(retraining_threshold - training_threshold)
+        ]
     ):
+        assert emulator._num_times_trained == 1
         assert emulator._nexact == training_threshold + i
         emulator(x)
 
@@ -102,4 +106,4 @@ def test_retraining_threshold():
     assert emulator.trained
     assert emulator._num_times_trained == 2
     assert emulator._nemul == 2
-    assert emulator._nexact == training_threshold + retraining_threshold
+    assert emulator._nexact == retraining_threshold

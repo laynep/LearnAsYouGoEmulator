@@ -81,11 +81,18 @@ class Learner(object):
     trained : bool
         Whether the emulator has been trained
 
+    used_train_x : List[np.ndarray]
+    used_train_y : List[np.ndarray]
+        Values from the true function that were used last time the emulator was
+        trained
+
+    batch_train_x : List[np.ndarray]
+    batch_train_y : List[np.ndarray]
+        Values from the true function that have not yet been used to train the
+        emulator
+
     init_train_thresh : int
         Number of points to accumulate before training the emulator
-
-    other_train_thresh : int
-        Number of addition points to accumulate before retraining the emulator
 
     frac_cv : float
         Fraction of training set to use for error modelling
@@ -118,11 +125,15 @@ class Learner(object):
 
         self.output_err: bool = False
 
+        self.used_train_x: List[np.ndarray] = []
+        self.used_train_y: List[np.ndarray] = []
+
         self.batch_train_x: List[np.ndarray] = []
         self.batch_train_y: List[np.ndarray] = []
 
+        self._size_last_trained = np.nan
+
         self.init_train_thresh: int = 1000
-        self.other_train_thresh: int = 5000
 
         # Fraction of training set to use for error modelling
         self.frac_cv = 0.5
@@ -134,23 +145,6 @@ class Learner(object):
         # Number of exact or emulated evaluations
         self._nexact: int = 0
         self._nemul: int = 0
-
-    def overrideDefaults(self, init_train_thresh, other_train_thresh):
-        """
-        Override some of the defaults that are otherwise set in the constructor
-
-        Parameters
-        ----------
-        init_train_thresh : int
-            Number of data points to accumulate before first training the
-            emulator
-
-        other_train_thresh : int
-            Number of new data points to accumulate retraining the emulator
-        """
-
-        self.init_train_thresh = init_train_thresh
-        self.other_train_thresh = other_train_thresh
 
     def eval_true_func(self, x: np.ndarray) -> np.ndarray:
         """
@@ -176,6 +170,11 @@ class Learner(object):
         self.batch_train_x.append(x)
         self.batch_train_y.append(myY)
 
+        # TODO: Add points to the emulator if it supports "live" updating
+
+        retraining_threshold = (1 + self.frac_cv) * self._size_last_trained
+        current_points = len(self.used_train_x) + len(self.batch_train_x)
+
         # Check if list size has increased above some threshold
         # If so, train for first time
         if not self.trained and len(self.batch_train_x) >= self.init_train_thresh:
@@ -183,29 +182,29 @@ class Learner(object):
             self.train(np.array(self.batch_train_x), np.array(self.batch_train_y))
 
             # Empty the batch
+            self.used_train_x.extend(self.batch_train_x)
+            self.used_train_y.extend(self.batch_train_y)
             self.batch_train_x = []
             self.batch_train_y = []
 
         # Check if list size has increased above retraining threshold
         # If so, train again
-        elif self.trained and len(self.batch_train_x) >= self.other_train_thresh:
+        elif self.trained and current_points >= retraining_threshold:
 
-            self.emulator.emul_func.xtrain = np.append(
-                self.emulator.emul_func.xtrain, self.batch_train_x, axis=0
-            )
-            self.emulator.emul_func.ytrain = np.append(
-                self.emulator.emul_func.ytrain, self.batch_train_y, axis=0
-            )
+            new_train_x = np.array(self.used_train_x + self.batch_train_x)
+            new_train_y = np.array(self.used_train_y + self.batch_train_y)
 
-            self.train(self.emulator.emul_func.xtrain, self.emulator.emul_func.ytrain)
+            self.train(new_train_x, new_train_y)
 
             # Empty the batch
+            self.used_train_x.extend(self.batch_train_x)
+            self.used_train_y.extend(self.batch_train_y)
             self.batch_train_x = []
             self.batch_train_y = []
 
         return myY
 
-    def train(self, x_train: List[np.ndarray], y_train: List[np.ndarray]):
+    def train(self, x_train: np.ndarray, y_train: np.ndarray):
         """Train a ML algorithm to replace true_func: X --> Y.  Estimate error model via cross-validation.
 
         Parameters
@@ -225,6 +224,8 @@ class Learner(object):
         if self.output_err is not False:
             # raise Exception('Do not currently have capability to output the error to the chain.')
             pass
+
+        self._size_last_trained = x_train.shape[0]
 
         # Separate into training and cross-validation sets with 50-50 split so that
         # the prediction and the error are estimated off the same amount of data
