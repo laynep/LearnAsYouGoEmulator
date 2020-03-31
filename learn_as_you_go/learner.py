@@ -8,7 +8,7 @@ from .emulator import BaseEmulator
 from .util import check_good
 
 
-def emulate(emulator_class: BaseEmulator) -> Callable:
+def emulate(emulator_class) -> Callable:
     """
     Emulate a function with the given emulator class
 
@@ -29,6 +29,8 @@ def emulate(emulator_class: BaseEmulator) -> Callable:
     >>>     return np.ones_like(x)
 
     """
+
+    assert issubclass(emulator_class, BaseEmulator)
 
     def inner(true_func: Callable) -> Learner:
 

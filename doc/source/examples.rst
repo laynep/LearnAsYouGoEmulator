@@ -1,8 +1,8 @@
 Examples
 ========
 
-An example of basic use of `learn_as_you_go`.
+.. toctree::
+    :maxdepth: 2
 
-.. literalinclude:: ../../examples/example_basic.py
-
-*TODO: the plot generated*
+    examples/basic.rst
+    examples/custom_emulator.rst
