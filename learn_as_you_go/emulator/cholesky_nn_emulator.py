@@ -161,3 +161,5 @@ class CholeskyNnEmulator(BaseEmulator):
         self.emul_error: Callable[
             [np.ndarray], np.ndarray
         ] = self.emul_func.train_dist_error_model(x_cv, y_cv_err)
+
+    # TODO: override add_data

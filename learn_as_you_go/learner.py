@@ -170,7 +170,9 @@ class Learner(object):
         self.batch_train_x.append(x)
         self.batch_train_y.append(myY)
 
-        # TODO: Add points to the emulator if it supports "live" updating
+        # Add points to the emulator
+        # No effect unless the emulator implements updating on the fly
+        self.emulator.add_data(np.array([x]), np.array([myY]))
 
         retraining_threshold = (1 + self.frac_cv) * self._size_last_trained
         current_points = len(self.used_train_x) + len(self.batch_train_x)
@@ -239,7 +241,8 @@ class Learner(object):
         assert y_cv.shape == CV_y_err.shape  # Bizarre bugs if this isn't true
         self.emulator.set_emul_error_func(x_cv, CV_y_err)
 
-        # TODO Add the CV values back to the training set
+        # Provide the cross validation values to the emulator
+        self.emulator.add_data(x_cv, y_cv)
 
         self.trained = True
         self._num_times_trained += 1

@@ -32,3 +32,23 @@ class BaseEmulator(ABC):
     @abstractmethod
     def set_emul_error_func(self, x_cv: np.ndarray, y_cv_err: np.ndarray) -> None:
         pass
+
+    def add_data(self, x_train: np.ndarray, y_train: np.ndarray) -> None:
+        """
+        Add data to the training set on the fly
+
+        By default this method does nothing.
+
+        Overriding this method is not mandatory (some emulators require a long
+        time to train, so adding a couple new points may not make sense).
+
+        Parameters
+        ----------
+
+        x_train : np.ndarray
+            Array of x-values
+        y_train : np.ndarray
+            Array of y-values
+        """
+
+        pass
