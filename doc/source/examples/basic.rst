@@ -1,8 +1,7 @@
-Basic Usuage
-============
+Basic Usage
+===========
 
 An example of basic use of `learn_as_you_go`.
 
-.. literalinclude:: ../../../examples/example_basic.py
-
-*TODO: the plot generated*
+.. plot:: ../../examples/example_basic.py
+    :include-source:
