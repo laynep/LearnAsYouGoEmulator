@@ -376,6 +376,6 @@ class Learner(object):
             self._nexact += 1
 
         if self.output_err:
-            return float(val), float(err)
+            return val, float(err)
         else:
-            return float(val)
+            return val
