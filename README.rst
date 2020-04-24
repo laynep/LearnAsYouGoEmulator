@@ -2,7 +2,6 @@ LearnAsYouGoEmulator
 ====================
 
 Python implementation of the Learn As You Go algorithm published in http://arxiv.org/abs/arXiv:1506.01079.
-TODO: reference ICLR paper
 
 .. image:: https://zenodo.org/badge/240627897.svg
    :target: https://zenodo.org/badge/latestdoi/240627897
