@@ -20,7 +20,7 @@ setuptools.setup(
     url="https://github.com/laynep/LearnAsYouGoEmulator",
     author="Layne Price",  # author(s)
     author_email="layne.c.price@gmail.com",  # email
-    # license='MIT',  # licensing
+    license="Apache Licence (2.0)",
     packages=setuptools.find_packages(),
     install_requires=[
         "matplotlib",
@@ -34,7 +34,7 @@ setuptools.setup(
     ],  # dependencies
     classifiers=[
         "Programming Language :: Python :: 3",
-        # "License :: ",  # TODO: Licence
+        "License :: OSI Approved :: Apache Software License",
         "Intended Audience :: Science/Research",
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
