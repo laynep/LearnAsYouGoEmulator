@@ -3,7 +3,7 @@ from typing import Callable
 import matplotlib.pyplot as plt  # type: ignore
 import numpy as np  # type: ignore
 
-from learn_as_you_go import BaseEmulator, emulate  # NOQA
+from layg import BaseEmulator, emulate  # NOQA
 
 
 class MeanEmulator(BaseEmulator):

@@ -1,13 +1,13 @@
 """
-An example use of the `learn_as_you_go` package
+An example use of the `layg` package
 """
 
 import matplotlib.pyplot as plt  # type: ignore
 import numpy as np  # type: ignore
 
 # TODO: remove NOQA when isort is fixed
-from learn_as_you_go import CholeskyNnEmulator as Emulator  # NOQA
-from learn_as_you_go import emulate  # NOQA
+from layg import CholeskyNnEmulator as Emulator  # NOQA
+from layg import emulate  # NOQA
 
 
 def main():

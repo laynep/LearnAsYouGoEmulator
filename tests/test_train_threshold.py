@@ -2,8 +2,8 @@ import numpy as np  # type: ignore
 import pytest  # type: ignore
 
 # TODO: remove NOQA when isort is fixed
-from learn_as_you_go import CholeskyNnEmulator  # NOQA
-from learn_as_you_go import Learner  # NOQA
+from layg import CholeskyNnEmulator  # NOQA
+from layg import Learner  # NOQA
 
 XDIM = 1
 CONSTANT = 1.0

@@ -7,10 +7,10 @@ import torch  # type: ignore
 
 # TODO: remove NOQA when isort is fixed
 import functions  # NOQA
-from learn_as_you_go import CholeskyNnEmulator  # NOQA
-from learn_as_you_go import InterpolationEmulator  # NOQA
-from learn_as_you_go import TorchEmulator  # NOQA
-from learn_as_you_go import emulate  # NOQA
+from layg import CholeskyNnEmulator  # NOQA
+from layg import InterpolationEmulator  # NOQA
+from layg import TorchEmulator  # NOQA
+from layg import emulate  # NOQA
 
 DEFAULT_ABS_ERR = 0.05
 DEFAULT_REL_ERR = 1.0

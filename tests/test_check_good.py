@@ -11,7 +11,7 @@ import numpy as np  # type: ignore
 import pytest  # type: ignore
 
 # TODO: remove NOQA when isort is fixed
-from learn_as_you_go.util import check_good  # NOQA
+from layg.util import check_good  # NOQA
 
 
 @pytest.mark.parametrize("test_input", [0, 1, 1.0, np.array(1.0)])

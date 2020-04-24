@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Setup file for learn_as_you_go package
+"""Setup file for layg package
 
 Developer install
 -----------------
@@ -12,14 +12,14 @@ with open("README.rst", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="learn_as_you_go",  # name of package on import
+    name="layg",  # name of package on import
     version="0.0.1.dev",
     description="Learn-as-you-go emulator with error estimation",
     long_description=long_description,
-    long_description_content_type="text/markdown",
-    url="https://github.com/laynep/LearnAsYouGoEmulator",
-    author="Layne Price",  # author(s)
-    author_email="layne.c.price@gmail.com",  # email
+    long_description_content_type="text/x-rst",
+    url="https://github.com/auckland-cosmo/LearnAsYouGoEmulator",
+    author="Nathan Musoke, Layne Price",
+    author_email="n.musoke@aucland.ac.nz, layne.c.price@gmail.com",
     license="Apache Licence (2.0)",
     packages=setuptools.find_packages(),
     install_requires=[

@@ -7,7 +7,7 @@ import torch  # type: ignore
 
 # TODO: remove NOQA when isort is fixed
 import functions  # NOQA
-from learn_as_you_go.emulator.torch_emulator import Net  # NOQA
+from layg.emulator.torch_emulator import Net  # NOQA
 
 DEFAULT_ABS_ERR = 0.05
 DEFAULT_REL_ERR = 1.0

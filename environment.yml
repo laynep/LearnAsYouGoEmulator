@@ -1,4 +1,4 @@
-name: LearnAsYouGoEmulator
+name: layg
 channels:
   - defaults
   - conda-forge

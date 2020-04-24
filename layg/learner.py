@@ -22,7 +22,7 @@ def emulate(emulator_class) -> Callable:
 
     TODO: More thorough example
 
-    >>> from learn_as_you_go import emulate, CholeskyNnEmulator
+    >>> from layg import emulate, CholeskyNnEmulator
     >>> @emulate(CholeskyNnEmulator)
     >>> def expensive_calculation(x: np.ndarray) -> np.ndarray:
     >>>     # Function definition
