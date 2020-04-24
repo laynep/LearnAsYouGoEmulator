@@ -43,7 +43,15 @@ An example of this definition is provided.
 Installation
 ------------
 
-There are a small number of python dependencies.
+**pip**
+
+The package is available on pypi.org_.
+Install it with ::
+
+    pip install layg
+
+**anaconda**
+
 If you use anaconda you can create an appropriate environment and install to your python path by running ::
 
     conda env create --file environment.yml
@@ -51,4 +59,4 @@ If you use anaconda you can create an appropriate environment and install to you
 
 from this directory.
 
-The ``pytorch`` dependency is only needed if you are using the neural network emulator or running the associated tests.
+.. _pypi.org: https://pypi.org/project/layg/
