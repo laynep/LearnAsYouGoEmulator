@@ -1,11 +1,14 @@
 """
-An example use of the `layg` package
+An example use of the `learn_as_you_go` package with emcee
 """
 
+import emcee  # type: ignore
+import gif  # type: ignore
+import matplotlib.pyplot as plt  # type: ignore
 import numpy as np  # type: ignore
 
 # TODO: remove NOQA when isort is fixed
-from layg import CholeskyNnEmulator as Emulator  # NOQA
+from layg import CholeskyNnEmulator  # NOQA
 from layg import emulate  # NOQA
 
 
@@ -17,59 +20,69 @@ def main():
     niterations = 1000
     nthreads = 1
 
-    ######################
-    ######################
+    np.random.seed(1234)
+
     # Toy likelihood
-    @emulate(Emulator)
+    @emulate(CholeskyNnEmulator)
     def loglike(x):
-        if x.ndim != 1:
-            loglist = []
-            for x0 in x:
-                loglist.append(-np.dot(x0, x0))
-            return np.array(loglist)
-        else:
-            return np.array(-np.dot(x, x))
+        return -np.dot(x, x) ** 1
 
-    ######################
-    ######################
+    loglike.output_err = True
+    loglike.abs_err_local = 2
 
-    # Make fake data
-    def get_x(ndim):
-
-        if ndim == 1:
-
-            return np.random.randn(1000)
-
-        elif ndim == 2:
-
-            return np.array([np.random.normal(0.0, 1.0), np.random.normal(0.0, 0.1)])
-            # np.random.normal(1.0,0.1),
-            # np.random.normal(0.0,0.1),
-            # np.random.normal(0.0,60.1),
-            # np.random.normal(1.0,2.1)])
-
-        else:
-            raise RuntimeError(
-                "This number of dimensions has not been implemented for testing yet."
-            )
-
-    # Let's see if this works with a Monte Carlo method
-    import emcee  # type: ignore
-
-    p0 = np.array([get_x(ndim) for _ in range(nwalkers)])
+    # Starting points for walkers
+    p0 = np.random.normal(-1.0, 1.0, size=(nwalkers, ndim))
     sampler = emcee.EnsembleSampler(nwalkers, ndim, loglike, threads=nthreads)
 
-    for result in sampler.sample(p0, iterations=niterations, storechain=False):
-        fname = open("test.txt", "a")
+    # Sample with emcee
+    with open("test.txt", "w") as f:
+        for result in sampler.sample(p0, iterations=niterations, storechain=True):
 
-        for elmn in zip(result[1], result[0]):
-            fname.write("%s " % str(elmn[0]))
-            for k in list(elmn[1]):
-                fname.write("%s " % str(k))
-            fname.write("\n")
+            for pos, lnprob, err in zip(result[0], result[1], result[3]):
+                for k in list(pos):
+                    f.write("%s " % str(k))
+                f.write("%s " % str(lnprob))
+                f.write("%s " % str(err))
+                f.write("\n")
 
     print("n exact evals:", loglike._nexact)
     print("n emul evals:", loglike._nemul)
+
+    # Plot points sampled
+    nframes = 50
+    duration = 10
+    frames = []
+    lim = (-3, 3)
+
+    for i in range(0, niterations * nwalkers, niterations * nwalkers // nframes):
+        x = sampler.chain.reshape(niterations * nwalkers, ndim)[:i]
+        y = np.array(sampler.blobs).reshape(niterations * nwalkers)[:i]
+        frame = plot(x, y, lim)
+        frames.append(frame)
+
+    gif.save(frames, "mc.gif", duration=duration)
+
+
+@gif.frame
+def plot(x, err, lim):
+
+    true = x[err == 0.0]
+    emul = x[err != 0.0]
+
+    plt.figure(figsize=(5, 5), dpi=100)
+
+    marker = "."
+    alpha = 0.3
+
+    plt.scatter(true[:, 0], true[:, 1], marker=marker, alpha=alpha, label="true")
+    plt.scatter(emul[:, 0], emul[:, 1], marker=marker, alpha=alpha, label="emulated")
+
+    plt.xlim(lim)
+    plt.ylim(lim)
+
+    legend = plt.legend(loc=1)
+    for lh in legend.legendHandles:
+        lh.set_alpha(1)
 
 
 def test_main():

@@ -32,27 +32,15 @@ def main():
 
     # Make fake data
     def get_x(ndim):
+        """
+        Sample from a Gaussian with mean 0 and std 1
+        """
 
-        if ndim == 1:
-
-            return np.random.randn(1000)
-
-        elif ndim == 2:
-
-            return np.array([np.random.normal(0.0, 1.0), np.random.normal(0.0, 0.1)])
-            # np.random.normal(1.0,0.1),
-            # np.random.normal(0.0,0.1),
-            # np.random.normal(0.0,60.1),
-            # np.random.normal(1.0,2.1)])
-
-        else:
-            raise RuntimeError(
-                "This number of dimensions has not been implemented for testing yet."
-            )
+        return np.random.normal(0.0, 1.0, size=ndim)
 
     if ndim == 1:
-        Xtrain = get_x(ndim)
-        xlist = np.linspace(-3.0, 3.0, 11)
+        Xtrain = np.array([get_x(ndim) for _ in range(1000)])
+        xlist = np.array([np.linspace(-3.0, 3.0, 11)]).T
 
     elif ndim == 2:
 
@@ -67,9 +55,11 @@ def main():
     Ytrain = np.array([loglike(X) for X in Xtrain])
     loglike.train(Xtrain, Ytrain)
 
+    loglike.output_err = True
     for x in xlist:
         print("x", x)
-        print("val, err", loglike(x))
+        print("val, err", loglike(np.array(x)))
+    loglike.output_err = False
 
     # Plot an example
     assert loglike.trained

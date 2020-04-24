@@ -31,6 +31,7 @@ setuptools.setup(
         "sphinx",
         "sphinx_rtd_theme",
         "emcee>=2,<3",
+        "gif==1.0.3",
     ],  # dependencies
     classifiers=[
         "Programming Language :: Python :: 3",
