@@ -3,15 +3,18 @@ LearnAsYouGoEmulator
 
 Python implementation of the Learn As You Go algorithm published in `arxiv:1506:01079 <http://arxiv.org/abs/arXiv:1506.01079>`_.
 
+.. image:: https://readthedocs.org/projects/learnasyougoemulator/badge/?version=latest
+    :target: https://learnasyougoemulator.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+
 .. image:: https://zenodo.org/badge/240627897.svg
-   :target: https://zenodo.org/badge/latestdoi/240627897
+    :target: https://zenodo.org/badge/latestdoi/240627897
 
 .. image:: https://github.com/auckland-cosmo/LearnAsYouGoEmulator/workflows/pytest/badge.svg
 
 .. image:: https://github.com/auckland-cosmo/LearnAsYouGoEmulator/workflows/doc/badge.svg
 
 .. image:: https://github.com/auckland-cosmo/LearnAsYouGoEmulator/workflows/lints/badge.svg
-
 
 
 The package defines a decorator that can be applied to functions to convert them to functions which learn outputs as they go and emulate the true function when expected errors are low.
