@@ -1,7 +1,7 @@
 Custom Emulators
 ================
 
-This example shows how to build a custom emulator by defining a subclass of :class:`learn_as_you_go.emulator.BaseEmulator`.
+This example shows how to build a custom emulator by defining a subclass of :class:`layg.emulator.BaseEmulator`.
 
 The emulator simply learns the mean and standard deviation of the supplied training data.
 

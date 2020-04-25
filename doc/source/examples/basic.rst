@@ -1,7 +1,7 @@
 Basic Usage
 ===========
 
-An example of basic use of `learn_as_you_go`.
+An example of basic use of `layg`.
 
 .. plot:: ../../examples/example_basic.py
     :include-source:
