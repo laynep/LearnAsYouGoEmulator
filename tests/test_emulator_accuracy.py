@@ -32,8 +32,7 @@ CONSTANT = np.array([1.0])
 )
 @pytest.mark.parametrize("xdim", [1, 2, 3])
 @pytest.mark.parametrize(
-    "emulator",
-    [CholeskyNnEmulator, pytest.param(TorchEmulator, marks=pytest.mark.xfail)],
+    "emulator", [CholeskyNnEmulator, TorchEmulator],
 )
 def test_accuracy(emulator, true_function, xdim):
     """
