@@ -12,9 +12,6 @@ from layg import InterpolationEmulator  # NOQA
 from layg import TorchEmulator  # NOQA
 from layg import emulate  # NOQA
 
-DEFAULT_ABS_ERR = 0.05
-DEFAULT_REL_ERR = 1.0
-
 CONSTANT = np.array([1.0])
 
 
@@ -98,8 +95,8 @@ def test_accuracy(emulator, true_function, xdim):
     true_val = true_function(x)
     emul_val, _ = emulated_function(x)
 
-    assert np.abs(true_val - emul_val) < DEFAULT_ABS_ERR
-    assert np.abs((emul_val - true_val) / true_val) < DEFAULT_REL_ERR
+    assert np.abs(true_val - emul_val) < emulated_function.abs_err_local
+    assert np.abs((emul_val - true_val) / true_val) < emulated_function.frac_err_local
 
 
 @pytest.mark.parametrize(
