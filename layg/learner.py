@@ -147,6 +147,7 @@ class Learner(object):
         # Number of exact or emulated evaluations
         self._nexact: int = 0
         self._nemul: int = 0
+        self._nemul_failed: int = 0
 
     def eval_true_func(self, x: np.ndarray) -> np.ndarray:
         """
@@ -370,6 +371,7 @@ class Learner(object):
                 val = self.eval_true_func(x)
                 err = 0.0
                 self._nexact += 1
+                self._nemul_failed += 1
 
         else:
             val, err = self.eval_true_func(x), 0.0
