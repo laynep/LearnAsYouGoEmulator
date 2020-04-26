@@ -61,12 +61,22 @@ def test_accuracy(emulator, true_function, xdim):
     x_test = np.zeros((num_tests, xdim))
     x_test[:, 0] = np.linspace(-1, +2, num_tests)
     y_test = np.array([true_function(x) for x in x_test])
-    y_emu = []
-    y_err = []
-    for x in x_test:
+    y_emu = np.empty_like(y_test)
+    y_err = np.empty(num_tests)
+    for i, x in enumerate(x_test):
         val, err = emulated_function(x)
-        y_emu.append(val)
-        y_err.append(err)
+        y_emu[i] = val
+        y_err[i] = err
+
+    # Project data
+    x_true = x_test[:, 0]
+    y_true = y_test[:, 0]
+    x_exact = x_true[y_err == 0.0]
+    y_exact = y_emu[y_err == 0.0]
+    y_err_exact = y_err[y_err == 0.0]
+    x_emulated = x_true[y_err != 0.0]
+    y_emulated = y_emu[y_err != 0.0]
+    y_err_emulated = y_err[y_err != 0.0]
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -74,14 +84,23 @@ def test_accuracy(emulator, true_function, xdim):
     ax.set_title(test_name)
 
     ax.axvspan(0, 1, label="training data range", alpha=0.2)
-    ax.scatter(x_test[:, 0], y_test, marker="+", label="true value")
+    ax.scatter(x_true, y_true, marker="+", label="true value")
     ax.errorbar(
-        x_test[:, 0],
-        y_emu,
-        yerr=y_err,
+        x_exact,
+        y_exact,
+        yerr=y_err_exact,
         capsize=2,
         linestyle="None",
-        label="emulator",
+        label="exact",
+        color="black",
+    )
+    ax.errorbar(
+        x_emulated,
+        y_emulated,
+        yerr=y_err_emulated,
+        capsize=2,
+        linestyle="None",
+        label="emulated",
         color="red",
     )
     ax.legend()
