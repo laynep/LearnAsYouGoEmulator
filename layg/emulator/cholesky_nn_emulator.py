@@ -81,10 +81,14 @@ class cholesky_NN(object):
         # Build KDTree for quick lookup
         self.transf_xtree = KDTree(self.transf_x)
 
-    def emulate(self, x, k=5):
+    def emulate(self, x, delta=1):
 
-        if k < 2:
-            raise Exception("Need k>1")
+        if delta < 0 or not isinstance(delta, int):
+            raise ValueError(
+                "Got degree of interpolation {}, must be a non-negative integer".format(
+                    delta
+                )
+            )
         if x.ndim != self.xtrain[0].ndim:
             raise Exception(
                 "Requested x and training set do not have the same number of dimension."
@@ -93,24 +97,21 @@ class cholesky_NN(object):
         # Change basis
         x0 = np.dot(self.L_mat, x)
 
+        # Need enough neighbours to constrain fit with degree delta polynomials
+        k = 2 * n_coef(x.shape[0], delta)
+
         # Get nearest neighbors
         dist, loc = self.transf_xtree.query(x0, k=k)
+        nearest_x = self.transf_x[loc]
+        nearest_y = self.ytrain[loc]
+
         # Protect div by zero
         dist = np.array([np.max([1e-15, d]) for d in dist])
         weight = 1.0 / dist
-        nearest_y = self.ytrain[loc]
 
-        # Interpolate with weighted average
-        if self.ytrain.ndim > 1:
-            y_predict = np.array([np.average(y0, weights=weight) for y0 in nearest_y.T])
-            testgood = all([check_good(y) for y in y_predict])
-        elif self.ytrain.ndim == 1:
-            y_predict = np.average(nearest_y, weights=weight)
-            testgood = check_good(y_predict)
-        else:
-            raise Exception("The dimension of y training data is weird")
+        y_predict = polynomial_fit(x0, nearest_x, nearest_y, weight, delta)
 
-        if not testgood:
+        if not check_good(y_predict):
             raise Exception("y prediction went wrong")
 
         return y_predict
@@ -175,3 +176,105 @@ class cholesky_NN(object):
         # plt.show()
 
         return new_error_model
+
+
+def polynomial_fit(
+    x_0: np.ndarray, x_nn: np.ndarray, y_nn: np.ndarray, weights: np.ndarray, delta: int
+) -> np.ndarray:
+    """
+    Compute polynomial fit
+
+    Assumes that the point of interest is at the origin
+
+    Parameters
+    ----------
+
+    x_0 : np.ndarray
+        point at which to evaluate polynomial fit
+
+    x_nn : np.ndarray
+        distances to nearest neighbours
+
+    y_nn : np.ndarray
+        y-values at nearest neighbours
+
+    delta : int
+        degree of polynomial
+    """
+
+    n = x_0.shape[0]
+    k = x_nn.shape[0]
+    m = y_nn.shape[1]
+
+    # Check that shapes are consistent
+    assert x_nn.shape == (k, n)
+    assert y_nn.shape == (k, m)
+    assert weights.shape == (k,)
+
+    N_coefs = n_coef(n, delta)
+
+    assert k >= 2 * N_coefs
+
+    W = np.diagflat(weights)
+
+    Z = np.empty((k, N_coefs), dtype=float)
+    for i in range(k):
+        Z[i] = monomials(x_nn[i, :] - x_0, delta)
+
+    mat = np.linalg.inv(Z.T @ W @ Z) @ Z.T @ W
+    assert mat.shape == (N_coefs, k)
+
+    out = np.empty(m)
+
+    for j in range(m):
+        pj = mat @ y_nn[:, j]
+        out[j] = pj[0]
+
+    return out
+
+
+def n_coef(n: int, delta: int) -> int:
+    """
+    Number of monomials in n variables, up to degree delta
+
+    n : int
+        Number of variables
+
+    delta : int
+        Maximum degree
+    """
+
+    out = 1
+    for i in range(1, delta + 1):
+        out += np.arange(n, n + i - 1 + 1, 1).prod() / np.math.factorial(i)
+
+    return int(out)
+
+
+def monomials(x: np.ndarray, delta: int) -> np.ndarray:
+    """
+    Construct vector of monomials constructed from x
+
+    Parameters
+    ----------
+
+    x : np.ndarray
+        Point at which to evaluate monomial
+
+    delta : int
+        Degree of monomial
+    """
+
+    n = x.shape[0]
+    if delta > 1:
+        raise ValueError("Polynomials of degree {} unimplemented".format(delta))
+
+    N_coefs = n_coef(n, delta)
+
+    out = np.empty(N_coefs)
+
+    out[0] = 1
+    if delta > 0:
+        out[1:] = x
+
+    return out
