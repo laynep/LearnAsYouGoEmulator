@@ -25,7 +25,7 @@ def main():
                 loglist.append(-np.dot(x0, x0))
             return np.array(loglist)
         else:
-            return np.array(-np.dot(x, x))
+            return np.array([-np.dot(x, x)])
 
     ######################
     ######################
