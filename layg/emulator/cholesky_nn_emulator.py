@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import warnings
 from itertools import product
 from typing import Callable
 
@@ -111,7 +112,16 @@ class cholesky_NN(object):
         dist = np.array([np.max([1e-15, d]) for d in dist])
         weight = 1.0 / dist
 
-        y_predict = polynomial_fit(x0, nearest_x, nearest_y, weight, delta)
+        try:
+            y_predict = polynomial_fit(x0, nearest_x, nearest_y, weight, delta)
+        except np.linalg.LinAlgError as lin_alg_error:
+            # TODO: this is a hack; should propagate exceptions carefully
+            warnings.warn("Exception inside emulator: {}".format(lin_alg_error))
+
+            # return nans and let caller deal with it
+            output = np.empty(self.ytrain[0].shape[0])
+            output.fill(np.nan)
+            return output
 
         if not check_good(y_predict):
             raise Exception("y prediction went wrong")
