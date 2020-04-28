@@ -1,7 +1,7 @@
 LearnAsYouGoEmulator
 ====================
 
-Python implementation of the Learn As You Go algorithm published in `arxiv:1506:01079 <http://arxiv.org/abs/arXiv:1506.01079>`_.
+Python implementation of the Learn As You Go algorithm described in `arxiv:1506:01079 <http://arxiv.org/abs/arXiv:1506.01079>`_ and `arxiv:2004.11929 <https://arxiv.org/abs/2004.11929>`_.
 
 .. image:: https://readthedocs.org/projects/learnasyougoemulator/badge/?version=latest
     :target: https://learnasyougoemulator.readthedocs.io/en/latest/?badge=latest
