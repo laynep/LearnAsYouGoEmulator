@@ -1,9 +1,11 @@
 from __future__ import print_function
 
+from itertools import product
 from typing import Callable
 
 import numpy as np  # type: ignore
 import scipy.optimize as opt  # type: ignore
+from scipy import special  # type: ignore
 from scipy.spatial import cKDTree as KDTree  # type: ignore
 
 from ..util import check_good
@@ -81,7 +83,7 @@ class cholesky_NN(object):
         # Build KDTree for quick lookup
         self.transf_xtree = KDTree(self.transf_x)
 
-    def emulate(self, x, delta=1):
+    def emulate(self, x, delta=2):
 
         if delta < 0 or not isinstance(delta, int):
             raise ValueError(
@@ -219,7 +221,7 @@ def polynomial_fit(
 
     Z = np.empty((k, N_coefs), dtype=float)
     for i in range(k):
-        Z[i] = monomials(x_nn[i, :] - x_0, delta)
+        Z[i] = all_monomials(x_nn[i, :] - x_0, delta)
 
     mat = np.linalg.inv(Z.T @ W @ Z) @ Z.T @ W
     assert mat.shape == (N_coefs, k)
@@ -244,14 +246,14 @@ def n_coef(n: int, delta: int) -> int:
         Maximum degree
     """
 
-    out = 1
-    for i in range(1, delta + 1):
-        out += np.arange(n, n + i - 1 + 1, 1).prod() / np.math.factorial(i)
+    out = 0
+    for i in range(0, delta + 1):
+        out += special.comb(n + i - 1, i)
 
     return int(out)
 
 
-def monomials(x: np.ndarray, delta: int) -> np.ndarray:
+def all_monomials(x: np.ndarray, delta: int) -> np.ndarray:
     """
     Construct vector of monomials constructed from x
 
@@ -262,19 +264,57 @@ def monomials(x: np.ndarray, delta: int) -> np.ndarray:
         Point at which to evaluate monomial
 
     delta : int
-        Degree of monomial
+        Maximum degree of monomial
     """
 
     n = x.shape[0]
-    if delta > 1:
-        raise ValueError("Polynomials of degree {} unimplemented".format(delta))
 
     N_coefs = n_coef(n, delta)
 
-    out = np.empty(N_coefs)
+    monomial_list = []
 
-    out[0] = 1
-    if delta > 0:
-        out[1:] = x
+    monomial_list.append(np.ones(1))
+    for deg in range(1, delta + 1):
+        monomial_list.append(monomials_deg(x, deg))
+
+    out = np.concatenate(monomial_list)
+    assert out.shape == (N_coefs,)
+
+    return out
+
+
+def monomials_deg(x: np.ndarray, deg: int) -> np.ndarray:
+    """
+    Construct all monomials of degree equal to deg
+
+    This brute force implementation is minimally efficient.
+
+    Parameters
+    ----------
+
+    x : np.ndarray
+        Vector from which monomials should be constructed
+
+    deg : int
+        Degree of output monomials
+    """
+
+    n = x.shape[0]
+
+    n_terms = int(special.comb(n + deg - 1, deg))
+
+    exponents_list = []
+
+    # Iterate over all sets of exponents in a larger set than needed and pick
+    # out the right ones
+    # This is deterministic
+    for e in product(range(0, deg + 1), repeat=n):
+        if np.array(e).sum() == deg:
+            exponents_list.append(np.array(e))
+
+    exponents = np.array(exponents_list)
+    assert exponents.shape == (n_terms, n)
+
+    out = np.power(x, exponents).prod(axis=1)
 
     return out

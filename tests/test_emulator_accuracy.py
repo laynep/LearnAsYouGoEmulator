@@ -46,6 +46,8 @@ def test_accuracy(emulator, true_function, xdim):
     np.random.seed(0)
     torch.manual_seed(0)
 
+    emulated_function.init_train_thresh = 10_000
+
     for x in [
         np.random.uniform(size=xdim)
         for _ in range(emulated_function.init_train_thresh + 2)
@@ -84,12 +86,13 @@ def test_accuracy(emulator, true_function, xdim):
     ax.set_title(test_name)
 
     ax.axvspan(0, 1, label="training data range", alpha=0.2)
-    ax.scatter(x_true, y_true, marker="+", label="true value")
+    ax.scatter(x_true, y_true, marker="o", label="true value")
     ax.errorbar(
         x_exact,
         y_exact,
         yerr=y_err_exact,
         capsize=2,
+        marker="x",
         linestyle="None",
         label="exact",
         color="black",
