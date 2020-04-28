@@ -13,7 +13,7 @@ with open("README.rst", "r") as fh:
 
 setuptools.setup(
     name="layg",  # name of package on import
-    version="0.0.1.dev",
+    version="0.0.1",
     description="Learn-as-you-go emulator with error estimation",
     long_description=long_description,
     long_description_content_type="text/x-rst",
