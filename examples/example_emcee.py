@@ -25,7 +25,7 @@ def main():
     # Toy likelihood
     @emulate(CholeskyNnEmulator)
     def loglike(x):
-        return -np.dot(x, x) ** 1
+        return np.array([-np.dot(x, x) ** 1])
 
     loglike.output_err = True
     loglike.abs_err_local = 2
