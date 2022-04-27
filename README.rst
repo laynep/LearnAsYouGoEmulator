@@ -69,6 +69,7 @@ Install it with ::
 If you use anaconda you can create an appropriate environment and install to your python path by running ::
 
     conda env create --file environment.yml
+    conda activate layg
     pip install -e .
 
 from this directory.
